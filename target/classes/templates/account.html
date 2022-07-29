@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>账号管理</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.6/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="account" style="text-align: center;margin: 0 10px 0 10px">
+    <el-divider content-position="left">检索条件</el-divider>
+    <el-form ref="form" :model="form" label-width="140px" label-position="right">
+        <el-row type="flex" justify="center">
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="账号" prop="loginName" style="margin-bottom: 0px;">
+                    <el-input size="mini" v-model="form.account" placeholder="请输入内容" style="width: 180px;"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="统一社会信用代码" prop="accountType" style="margin-bottom: 0px;margin-left: 20px;">
+                    <el-input size="mini" v-model="form.copCodeScc" placeholder="请输入内容" style="width: 180px;"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :span="10" style="text-align: left;">
+                <el-form-item label="创建时间" style="margin-bottom: 0px;">
+                    <el-col :span="12">
+                        <el-date-picker size="mini" type="date" placeholder="选择日期" value-format="yyyy-MM-dd" v-model="form.createDateFrom" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                    <el-col class="line" :span="2">至</el-col>
+                    <el-col :span="10">
+                        <el-date-picker size="mini" placeholder="选择时间" value-format="yyyy-MM-dd" v-model="form.createDateTo" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                </el-form-item>
+            </el-col>
+        </el-row>
+        <el-row type="flex" justify="center">
+            <el-col :span="20" style="text-align: left;">
+                <el-form-item label="级别" prop="dataType" style="margin-bottom: 0px;">
+                    <el-select v-model="form.pLevel" placeholder="请选择" size="mini" style="width: 180px;">
+                        <el-option label="江苏省电子口岸" value="0"></el-option>
+                        <el-option label="企业" value="1"></el-option>
+                        <el-option label="代理" value="2"></el-option>
+                        <el-option label="口岸" value="3"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-col>
+        </el-row>
+        <el-row type="flex" justify="center">
+            <el-col :span="3" style="text-align: left;margin-top: 6px">
+                <el-button @click="init()" icon="el-icon-search" type="primary" plain size="mini">查询
+                </el-button>
+                <el-button @click="reset()" icon="el-icon-refresh" type="primary" plain size="mini">重置
+                </el-button>
+            </el-col>
+        </el-row>
+    </el-form>
+    <el-divider></el-divider>
+    <el-row>
+        <el-col :span="2">
+            <el-button @click="add()" icon="el-icon-circle-plus-outline" type="primary" plain size="mini">新增
+            </el-button>
+        </el-col>
+    </el-row>
+    <el-row size="mini" style="margin-top: 10px">
+        <el-table
+                :data="accountTable"
+                border
+                stripe
+                fit
+                :height="tableHeight"
+                size="mini">
+            <el-table-column
+                    type="index"
+                    label="序号"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="account"
+                    label="账号"
+                    width="150">
+            </el-table-column>
+            <el-table-column
+                    prop="copCodeScc"
+                    label="统一社会信用代码">
+            </el-table-column>
+            <el-table-column
+                    prop="copName"
+                    label="企业名称">
+            </el-table-column>
+            <el-table-column
+                    prop="createUser"
+                    label="创建人">
+            </el-table-column>
+            <el-table-column
+                    prop="createTime"
+                    label="创建时间"
+                    width="190">
+            </el-table-column>
+            <el-table-column
+                    prop="pLevel"
+                    label="级别"
+                    width="190">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.pLevel=='0'">江苏省电子口岸</span>
+                    <span v-if="scope.row.pLevel=='1'">企业</span>
+                    <span v-if="scope.row.pLevel=='2'">代理</span>
+                    <span v-if="scope.row.pLevel=='3'">口岸</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    label="操作"
+                    width="250" >
+                <template slot-scope="scope">
+                    <el-button @click="update(scope.row)" type="primary" plain size="mini">修改
+                    </el-button>
+                    <el-button @click="updatePas(scope.row)" type="primary" plain size="mini">密码修改
+                    </el-button>
+                    <el-button @click="deleteInfo(scope.row)" type="danger" plain size="mini">删除
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-row>
+    <div style="text-align: center;position:fixed; bottom:0;width: 100%">
+        <el-pagination
+                @current-change="handleCurrentChange"
+                :current-page.sync="currPage"
+                background
+                :page-size="pageSizeSelect"
+                layout="total, prev, pager, next"
+                :total.sync="totals">
+        </el-pagination>
+    </div>
+    <el-dialog :title="title" v-if="accountVisible" :visible.sync="accountVisible" width="50%" top="6vh" :before-close="cancel">
+        <el-form ref="accountForm" :model="accountForm" :rules="rules" label-width="150px" style="width: 90%" label-position="right">
+            <el-form-item label="账号" prop="account" v-if="updateFlag">
+                <el-input v-model="accountForm.account" :disabled="operationType=='update'?true:false"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="password" v-if="pasFlag">
+                <el-input v-model="accountForm.password" show-password></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码" prop="rePassword" v-if="pasFlag">
+                <el-input v-model="accountForm.rePassword" show-password></el-input>
+            </el-form-item>
+            <el-form-item label="创建人" prop="createUser" v-if="updateFlag">
+                <el-input v-model="accountForm.createUser"></el-input>
+            </el-form-item>
+            <el-form-item label="统一社会信用代码" prop="copCodeScc" v-if="updateFlag">
+                <el-input v-model="accountForm.copCodeScc"></el-input>
+            </el-form-item>
+            <el-form-item label="企业名称" prop="copName" v-if="updateFlag">
+                <el-input v-model="accountForm.copName"></el-input>
+            </el-form-item>
+            <el-form-item label="kafka服务器信息" prop="broker" v-if="updateFlag">
+                <el-input v-model="accountForm.broker"></el-input>
+            </el-form-item>
+            <el-form-item label="报关发送topic" prop="tcSdDec" v-if="updateFlag">
+                <el-input v-model="accountForm.tcSdDec"></el-input>
+            </el-form-item>
+            <el-form-item label="报关回执发送topic" prop="tcSdDecRec" v-if="updateFlag">
+                <el-input v-model="accountForm.tcSdDecRec"></el-input>
+            </el-form-item>
+            <el-form-item label="报检发送topic" prop="tcSdCiq" v-if="updateFlag">
+                <el-input v-model="accountForm.tcSdCiq"></el-input>
+            </el-form-item>
+            <el-form-item label="报检回执发送topic" prop="tcSdCiqRec" v-if="updateFlag">
+                <el-input v-model="accountForm.tcSdCiqRec"></el-input>
+            </el-form-item>
+            <el-form-item label="查验发送topic" prop="tcSdCheck" v-if="updateFlag">
+                <el-input v-model="accountForm.tcSdCheck"></el-input>
+            </el-form-item>
+            <el-form-item label="查验回执发送topic" prop="tcSdCheckRec" v-if="updateFlag">
+                <el-input v-model="accountForm.tcSdCheckRec"></el-input>
+            </el-form-item>
+            <el-form-item label="报关接收topic" prop="tcRxDec" v-if="updateFlag">
+                <el-input v-model="accountForm.tcRxDec"></el-input>
+            </el-form-item>
+            <el-form-item label="报关回执接收topic" prop="tcRxDecRec" v-if="updateFlag">
+                <el-input v-model="accountForm.tcRxDecRec"></el-input>
+            </el-form-item>
+            <el-form-item label="级别" prop="pLevel" v-if="updateFlag">
+                <el-select v-model="accountForm.pLevel" placeholder="请选择" style="width:100%">
+                    <el-option label="江苏省电子口岸" value="0"></el-option>
+                    <el-option label="企业" value="1"></el-option>
+                    <el-option label="代理" value="2"></el-option>
+                    <el-option label="口岸" value="3"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="submitForm()">确定</el-button>
+                <el-button @click="cancel()">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+</div>
+
+</body>
+<script type="text/javascript" src="js/vue/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
+<script type="text/javascript" src="js/axios.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript">
+    const passVal = (rule, value, callback) => {
+        var pwdRegex = new RegExp('(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9]).{8,30}');
+        if (!value) {
+            callback(new Error('请输入新密码'));
+        } else if (!pwdRegex.test(value.toString())) {
+            callback(new Error('密码中必须包含字母、数字、特称字符，至少8个字符'))
+        } else {
+            callback();
+        }
+    };
+
+    const rePassVal = (rule, value, callback) => {
+        if (!value) {
+            callback(new Error('请输入确认密码'));
+        } else if (value !== account.accountForm.password) {
+            callback(new Error('两次输入密码不一致!'))
+        } else {
+            callback();
+        }
+    };
+
+    var account = new Vue({
+        el: '#account',
+        data: {
+            form: {
+                account:'',
+                copCodeScc:'',
+                createDateFrom:'',
+                createDateTo:'',
+                pLevel:''
+            },
+            accountTable: [],
+            tableHeight: '',
+            currPage: 0,
+            totals: 0,
+            pageSizeSelect: 10,
+            pageNum: 1,
+            title:'',
+            operationType:'',
+            accountVisible:false,
+            updateFlag:false,
+            pasFlag:false,
+            accountForm:{
+                //主键
+                id:'',
+                account:'',
+                password:'',
+                rePassword:'',
+                createUser:'',
+                copCodeScc:'',
+                copName:'',
+                broker:'',
+                tcSdDec:'',
+                tcSdDecRec:'',
+                tcSdCiq:'',
+                tcSdCiqRec:'',
+                tcSdCheck:'',
+                tcSdCheckRec:'',
+                tcRxDec:'',
+                tcRxDecRec:'',
+                pLevel:''
+            },
+            rules: {
+                account: [
+                    { required: true, message: "请输入账号", trigger: "blur" },
+                ],
+                password: [
+                    { required: true, validator: passVal, trigger: "blur" },
+                ],
+                rePassword: [
+                    { required: true, validator: rePassVal, trigger: "blur" },
+                ],
+                createUser: [
+                    { required: true, message: "请输入创建人", trigger: "blur" },
+                ],
+                copCodeScc: [
+                    { required: true, message: "请输入统一社会信用代码", trigger: "blur" },
+                    { min: 18, max: 18, message: '请输入18位统一社会信用代码', trigger: 'blur' }
+                ],
+                copName: [
+                    { required: true, message: "请输入企业名称", trigger: "blur" },
+                ],
+                broker: [
+                    { required: true, message: "请输入kafka服务器信息", trigger: "blur" },
+                ],
+                tcSdDec: [
+                    { required: true, message: "请输入报关发送topic", trigger: "blur" },
+                ],
+                tcSdDecRec: [
+                    { required: true, message: "请输入报关回执发送topic", trigger: "blur" },
+                ],
+                tcSdCiq: [
+                    { required: true, message: "请输入报检发送topic", trigger: "blur" },
+                ],
+                tcSdCiqRec: [
+                    { required: true, message: "请输入报检回执发送topic", trigger: "blur" },
+                ],
+                tcSdCheck: [
+                    { required: true, message: "请输入查验发送topic", trigger: "blur" },
+                ],
+                tcSdCheckRec: [
+                    { required: true, message: "请输入查验回执发送topic", trigger: "blur" },
+                ],
+                tcRxDec: [
+                    { required: true, message: "请输入报关接收topic", trigger: "blur" },
+                ],
+                tcRxDecRec: [
+                    { required: true, message: "请输入报关回执接收topic", trigger: "blur" },
+                ],
+                pLevel: [
+                    { required: true, message: "请选择级别", trigger: "change" },
+                ]
+            }
+        },
+        created() {
+            this._getTableHeight()
+        },
+        mounted() {
+            let _this = this;
+            window.onresize = () => {
+                if (_this.resizeFlag) {
+                    clearTimeout(_this.resizeFlag)
+                }
+                _this.resizeFlag = setTimeout(() => {
+                    _this._getTableHeight()
+                    _this.resizeFlag = null
+                }, 100)
+            };
+            _this.init();
+        },
+        methods: {
+            init: function () {
+                var params = this.form;
+                params.pageSize = this.pageSizeSelect;
+                params.pageNum = this.pageNum;
+                request.post('accountController/list', params).then((r) => {
+                    if (r.data.success) {
+                        this.accountTable = r.data.data.records;
+                        this.currPage = r.data.data.current;
+                        this.totals = r.data.data.total;
+                    }
+                    this.pageNum=1;
+                });
+            },
+            handleCurrentChange: function (val) {
+                this.pageNum = val;
+                this.init();
+            },
+            //计算table高度
+            _getTableHeight() {
+                let tableH = 260;
+                let tableHeightDetil = window.innerHeight - tableH;
+                if (tableHeightDetil <= 300) {
+                    this.tableHeight = 300
+                } else {
+                    this.tableHeight = window.innerHeight - tableH
+                }
+            },
+            // 重置检索条件
+            reset: function(){
+                if (this.$refs['form'] != undefined) {
+                    this.form = {
+                        account:'',
+                        copCodeScc:'',
+                        createDateFrom:'',
+                        createDateTo:'',
+                        pLevel:''
+                    };
+                    this.$refs['form'].resetFields();
+                }
+            },
+
+            // 新增
+            add: function (row) {
+                this.title = '新增账号';
+                this.operationType = 'add';
+                this.updateFlag = true;
+                this.pasFlag = true;
+                this.accountVisible = true;
+            },
+
+            // 修改
+            update: function (row) {
+                this.title = '修改账号';
+                this.operationType = 'update';
+                this.accountForm = JSON.parse(JSON.stringify(row));
+                this.updateFlag = true;
+                this.pasFlag = false;
+                this.accountVisible = true;
+            },
+
+            // 密码修改
+            updatePas: function (row) {
+                this.title = '修改密码';
+                this.operationType = 'updatePas';
+                this.accountForm.id = row.id;
+                this.updateFlag = false;
+                this.pasFlag = true;
+                this.accountVisible = true;
+            },
+            // 删除
+            deleteInfo: function (row) {
+                var param = {
+                    id : row.id
+                }
+                this.$confirm('是否要删除这条账号？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    request.post('accountController/delete',param).then((r) => {
+                        if(r.data.success){
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功'
+                            });
+                            this.init();
+                        } else {
+                            this.$message.error('删除失败');
+                        }
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            passVal: function(rule, value, callback) {
+                var pwdRegex = new RegExp('(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9]).{8,30}');
+                if (!value) {
+                    callback(new Error('请输入新密码'));
+                } else if (!pwdRegex.test(value.toString())) {
+                    callback(new Error('密码中必须包含字母、数字、特称字符，至少8个字符'))
+                } else {
+                    callback();
+                }
+            },
+            // 提交表单
+            submitForm: function () {
+                this.$refs["accountForm"].validate((valid) => {
+                    if (valid) {
+                        //新增
+                        if (this.operationType == 'add') {
+                            request.post('accountController/save', this.accountForm).then((r) => {
+                                if (r.data.success) {
+
+                                    this.$message({
+                                        message: '新增成功',
+                                        type: 'success'
+                                    });
+                                    this.resetForm();
+                                    this.init();
+                                    this.accountVisible = false;
+
+                                } else {
+                                    account.$message.error(r.data.message);
+                                }
+                            });
+                            //编辑
+                        } else if (this.operationType == 'update') {
+                            request.post('accountController/update', this.accountForm).then((r) => {
+                                if (r.data.success) {
+
+                                    this.$message({
+                                        message: '修改成功',
+                                        type: 'success'
+                                    });
+                                    this.resetForm();
+                                    this.init();
+                                    this.accountVisible = false;
+                                } else {
+                                    account.$message.error(r.data.message);
+                                }
+                            });
+                            //修改密码
+                        } else if (this.operationType == 'updatePas') {
+                            request.post('accountController/updatePas', this.accountForm).then((r) => {
+                                if (r.data.success) {
+
+                                    this.$message({
+                                        message: '修改密码成功',
+                                        type: 'success'
+                                    });
+                                    this.resetForm();
+                                    this.init();
+                                    this.accountVisible = false;
+                                } else {
+                                    account.$message.error(r.data.message);
+                                }
+                            });
+                        }
+                    }
+                })
+            },
+
+            //重置表单
+            resetForm: function(){
+                this.accountForm = {
+                    account:'',
+                    password:'',
+                    rePassword:'',
+                    createUser:'',
+                    copCodeScc:'',
+                    copName:'',
+                    broker:'',
+                    tcSdDec:'',
+                    tcSdDecRec:'',
+                    tcSdCiq:'',
+                    tcSdCiqRec:'',
+                    tcSdCheck:'',
+                    tcSdCheckRec:'',
+                    tcRxDec:'',
+                    tcRxDecRec:'',
+                    pLevel:''
+                };
+                this.$refs["accountForm"].resetFields();
+            },
+
+
+            // 取消
+            cancel: function () {
+                this.accountForm = {
+                    account:'',
+                    password:'',
+                    rePassword:'',
+                    createUser:'',
+                    copCodeScc:'',
+                    copName:'',
+                    broker:'',
+                    tcSdDec:'',
+                    tcSdDecRec:'',
+                    tcSdCiq:'',
+                    tcSdCiqRec:'',
+                    tcSdCheck:'',
+                    tcSdCheckRec:'',
+                    tcRxDec:'',
+                    tcRxDecRec:'',
+                    pLevel:''
+                };
+                this.accountVisible = false;
+            },
+        }
+    })
+</script>
+<style>
+
+    .el-divider--horizontal {
+        margin: 15px 0;
+    }
+
+    .el-input.is-disabled .el-input__inner {
+        color: #606266;
+    }
+
+    .el-scrollbar__wrap{
+        overflow-x: hidden;
+    }
+
+    .el-select-dropdown .el-scrollbar .el-scrollbar__wrap {
+        overflow: scroll !important;
+    }
+
+    .el-table th.gutter {
+        display: table-cell !important;
+    }
+
+    .el-table colgroup.gutter {
+        display: table-cell !important;
+    }
+
+</style>
+</html>

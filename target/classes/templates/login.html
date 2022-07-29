@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>本地登录</title>
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.6/lib/theme-chalk/index.css">
+</head>
+
+<body>
+<div id="login">
+    <!--flex弹性盒子模型，justify-content：主抽 -->
+    <div style="display: flex;justify-content: center;margin-top: 150px">
+        <el-card style="width: 400px;height: 370px;">
+            <el-tabs v-model="activeName" type="card">
+                <el-tab-pane label="登陆" name="first" style="text-align: center">
+                    <el-form ref="loginForm" :model="loginForm" :rules="rules">
+                        <el-form-item label="" prop="account">
+                            <el-input v-model="loginForm.account" placeholder="账号"></el-input>
+                        </el-form-item>
+                        <el-form-item label="" prop="password">
+                            <el-input v-model="loginForm.password" show-password placeholder="密码"></el-input>
+                        </el-form-item>
+                        <el-form-item label="" prop="verification">
+                            <el-col :span="12">
+                                <el-input v-model="loginForm.verification" placeholder="验证码"></el-input>
+                            </el-col>
+                            <el-col :span="12">
+                                <img id="verification" style="width: 150px; height: 38px;cursor: pointer"
+                                     :src="url" @click="verificationChange"></img>
+                            </el-col>
+                        </el-form-item>
+                        <el-row style="margin: 20px 0 10px 0">
+                            <el-button type="success" style="width: 100%" @click="login()">登录</el-button>
+                        </el-row>
+                    </el-form>
+                </el-tab-pane>
+            </el-tabs>
+        </el-card>
+    </div>
+</div>
+
+
+</body>
+<script type="text/javascript" src="js/vue/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
+<script type="text/javascript" src="js/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="js/axios.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script src="js/jsencrypt.min.js"></script>
+<script src="js/basekey.js"></script>
+<script type="text/javascript">
+
+    //登陆判断父页面是否跳转到登录页
+    if (window.top!=null && window.top.document.URL!=document.URL){
+        window.top.location= document.URL;
+    }
+
+    var login = new Vue({
+        el: '#login',
+        data: {
+            loginForm:{
+                account:'',
+                password:'',
+                verification:''
+            },
+            activeName: 'first',
+            url:'loginController/getImageUrl',
+            rules: {
+                account: [
+                    { required: true, message: "请输入账号", trigger: "blur" },
+                ],
+                password: [
+                    { required: true, message: "请输入姓名", trigger: "blur" },
+                ],
+                verification: [
+                    { required: true, message: "请输入验证码", trigger: "blur" },
+                ]
+            }
+        },
+        methods: {
+            login: function () {
+                this.$refs["loginForm"].validate((valid) => {
+                    console.log(valid);
+                    var jsencrypt = new JSEncrypt();
+                    jsencrypt.setPublicKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCP4Zo3dI1luRATA9Z89m7ETbSrmlSXJlt2sRi+O9vXD7ZkNtx0LWaUknBChtM3QVL9/TBv6Fp1Si+O1g+Z7ZWWKyQoXao762d5AxCS11VU5hffqT9Tn3wS9qaXCeawaOna9TKiTsnZOwD2zEyvIjh/wD8JvPcpNlYgN4YbrEey1wIDAQAB");
+                    var account = jsencrypt.encrypt(this.loginForm.account);
+                    var password = jsencrypt.encrypt(this.loginForm.password);
+                    var verification = jsencrypt.encrypt(this.loginForm.verification);
+                    var param = {
+                        account:window.basekey.encode(account),
+                        password:window.basekey.encode(password),
+                        verification:window.basekey.encode(verification)
+                    }
+                    if (valid) {
+                        request.post('loginController/login', param).then((r) => {
+                            if (r.data.success) {
+                                window.location.href = "main.html";
+                            }else{
+                                login.$message.error(r.data.message);
+                            }
+                            $("#verification").attr('src',"loginController/getImageUrl?" + Math.random());
+                        });
+                    }
+                })
+            },
+            verificationChange: function () {
+                $("#verification").attr('src',"loginController/getImageUrl?" + Math.random());
+            },
+        }
+    })
+</script>
+<style>
+    body{
+        background:url("img/bj.png") no-repeat center;
+        background-size:cover;
+        background-attachment:fixed;
+    }
+</style>
+</html>

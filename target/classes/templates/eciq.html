@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>报检单查询</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.6/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="eciq" style="text-align: center;margin: 0 10px 0 10px">
+    <el-divider content-position="left">检索条件</el-divider>
+    <el-form id="searchForm" ref="form" :model="form" label-width="140px">
+        <el-row type="flex" justify="center">
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="企业报检号" prop="entDeclNo" style="margin-bottom: 0px;width: 250px">
+                    <el-input size="mini" v-model="form.entDeclNo" placeholder="请输入内容" style="width: 180px;"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="贸易方式代码" prop="tradeModeCode" style="margin-bottom: 0px;width: 250px">
+                    <el-input size="mini" v-model="form.tradeModeCode" placeholder="请输入内容" style="width: 180px;"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :span="10" style="text-align: left;">
+                <el-form-item label="创建时间" style="margin-bottom: 0px;">
+                    <el-col :span="12">
+                        <el-date-picker size="mini" type="date" placeholder="选择日期" value-format="yyyy-MM-dd" v-model="form.createDateFrom" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                    <el-col class="line" :span="2">至</el-col>
+                    <el-col :span="10">
+                        <el-date-picker size="mini" placeholder="选择时间" value-format="yyyy-MM-dd" v-model="form.createDateTo" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                </el-form-item>
+            </el-col>
+        </el-row>
+        <el-row type="flex" justify="center">
+            <el-col :span="3" style="text-align: left;margin-top: 6px">
+                <el-button @click="init()" icon="el-icon-search" type="primary" plain size="mini">查询
+                </el-button>
+                <el-button @click="reset()" icon="el-icon-refresh" type="primary" plain size="mini">重置
+                </el-button>
+            </el-col>
+        </el-row>
+    </el-form>
+    <el-divider></el-divider>
+    <el-row size="mini" style="margin-top: 10px">
+        <el-table
+                :data="eciqTable"
+                border
+                stripe
+                fit
+                :height="tableHeight"
+                size="mini"
+        >
+            <el-table-column
+                    type="index"
+                    label="序号"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="entDeclNo"
+                    label="企业报检号"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="tradeModeCode"
+                    label="贸易方式代码"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="contractNo"
+                    label="合同号"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="despPortCode"
+                    label="启运口岸代码"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="goodsPlace"
+                    label="存放地点"
+                    width="260">
+            </el-table-column>
+            <el-table-column
+                    prop="orgCode"
+                    label="报检地"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="inspOrgCode"
+                    label="口岸机构"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="declRegName"
+                    label="报检单位名称"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="declDate"
+                    label="报检日期"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="realtime"
+                    label="创建时间"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    label="操作"
+                    width="180">
+                <template slot-scope="scope">
+                    <el-button @click="view(scope.row)" type="primary" plain size="mini">详情
+                    </el-button>
+                    <el-button @click="viewResult(scope.row)" type="primary" plain size="mini">查看回执
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-row>
+    <div style="text-align: center;position:fixed; bottom:0;width: 100%">
+        <el-pagination
+                @current-change="handleCurrentChange"
+                :current-page.sync="currPage"
+                background
+                :page-size="pageSizeSelect"
+                layout="total, prev, pager, next"
+                :total.sync="totals">
+        </el-pagination>
+    </div>
+    <el-dialog title="详细信息" v-if="eciqVisible" :visible.sync="eciqVisible" width="85%" top="6vh" :before-close="cancel" class="spec-dialog">
+
+        <el-tabs v-model="tabsName" type="card" @tab-click="tabsHandleClick">
+            <el-tab-pane label="基本信息" name="decl">
+                <el-collapse v-model="collapseNames" @change="collapseHandleChange">
+                    <el-collapse-item title="企业信息" name="1">
+                        <el-card class="el-card-define">
+                            <el-form id="basicForm" ref="eciqDetailData" :model="eciqDetailData" label-width="120px"
+                                     size="mini" label-position="right">
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="企业报检号">
+                                            <el-input v-model="eciqDetailData.entDeclNo"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="检验检疫编号">
+                                            <el-input v-model="eciqDetailData.inspNo"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="报检单位名称">
+                                            <el-input v-model="eciqDetailData.declRegName"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="报检地">
+                                            <el-input v-model="eciqDetailData.orgCode"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="口岸机构">
+                                            <el-input v-model="eciqDetailData.inspOrgCode"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="报检员证号">
+                                            <el-input v-model="eciqDetailData.declPersnCertNo"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="报检员姓名">
+                                            <el-input v-model="eciqDetailData.declPersonName"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="报检单位代码">
+                                            <el-input v-model="eciqDetailData.declRegNo"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="报检单位联系人">
+                                            <el-input v-model="eciqDetailData.contactperson"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="报检联系人电话">
+                                            <el-input v-model="eciqDetailData.contTel"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="发货人代码">
+                                            <el-input v-model="eciqDetailData.consignorCode"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="发货人名称（中文）">
+                                            <el-input v-model="eciqDetailData.consignorCname"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="发货人名称（外文）">
+                                            <el-input v-model="eciqDetailData.consignorEname"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="发货人地址">
+                                            <el-input v-model="eciqDetailData.consignorAddr"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="收货人代码">
+                                            <el-input v-model="eciqDetailData.consigneeCode"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="收货人名称（中文）">
+                                            <el-input v-model="eciqDetailData.consigneeCname"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="收货人名称（外文）">
+                                            <el-input v-model="eciqDetailData.consigneeEname"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="收货人地址">
+                                            <el-input v-model="eciqDetailData.consigneeAddr"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="报关海关代码">
+                                            <el-input v-model="eciqDetailData.declCustm"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="企业组织机构代码">
+                                            <el-input v-model="eciqDetailData.techRegCode"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+
+                            </el-form>
+                        </el-card>
+                    </el-collapse-item>
+
+                    <el-collapse-item title="运输信息" name="2">
+                    <el-card class="el-card-define">
+                        <el-form id="basicForm" ref="eciqDetailData" :model="eciqDetailData" label-width="120px"
+                                 size="mini" label-position="right">
+                            <el-row>
+                                <el-col :span="6">
+                                    <el-form-item label="运输方式代码（原）">
+                                        <el-input v-model="eciqDetailData.transModeCodeOld"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="运输方式代码（新）">
+                                        <el-input v-model="eciqDetailData.transModeCodeNew"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="运输工具名称">
+                                        <el-input v-model="eciqDetailData.convynceName"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="运输工具号码">
+                                        <el-input v-model="eciqDetailData.transMeanNo"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="6">
+                                    <el-form-item label="启运口岸代码">
+                                        <el-input v-model="eciqDetailData.despPortCode"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="经停口岸代码">
+                                        <el-input v-model="eciqDetailData.portStopCode"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="入境口岸代码">
+                                        <el-input v-model="eciqDetailData.entyPortCode"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="目的地代码">
+                                        <el-input v-model="eciqDetailData.destCode"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="6">
+                                    <el-form-item label="到达口岸代码（原）">
+                                        <el-input v-model="eciqDetailData.arrivPortCodeOld"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="到达口岸代码（新）">
+                                        <el-input v-model="eciqDetailData.arrivPortCodeNew"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="6">
+                                    <el-form-item label="贸易方式">
+                                        <el-select v-model="eciqDetailData.tradeModeCode">
+                                            <el-option
+                                            v-for="item in baseTradeModeList"
+                                            :key="item.code"
+                                            :label="item.name"
+                                            :value="item.code">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="存放地点">
+                                        <el-input v-model="eciqDetailData.goodsPlace"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="合同号">
+                                        <el-input v-model="eciqDetailData.contractNo"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="到货日期">
+                                        <el-input v-model="eciqDetailData.gdsArvlDate"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="6">
+                                    <el-form-item label="入境：启运日期" v-if="eciqDetailData.aplKind=='I'">
+                                        <el-input v-model="eciqDetailData.despDate"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="出境：发货日期" v-if="eciqDetailData.aplKind=='E'">
+                                        <el-input v-model="eciqDetailData.despDate"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="海关注册号">
+                                        <el-input v-model="eciqDetailData.custmRegNo"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="6">
+                                    <el-form-item label="分运单号">
+                                        <el-input v-model="eciqDetailData.splitBillLadNo"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </el-form>
+                    </el-card>
+                </el-collapse-item>
+
+                    <el-collapse-item title="其他信息" name="3">
+                        <el-card class="el-card-define">
+                            <el-form id="basicForm" ref="eciqDetailData" :model="eciqDetailData" label-width="120px"
+                                     size="mini" label-position="right">
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="标记及号码">
+                                            <el-input v-model="eciqDetailData.markNo"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="索赔截止日期">
+                                            <el-input v-model="eciqDetailData.counterClaim"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="提/运单号">
+                                            <el-input v-model="eciqDetailData.billLadNo"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="提货单号">
+                                            <el-input v-model="eciqDetailData.deliveryOrder"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="贸易国别代码（原）">
+                                            <el-input v-model="eciqDetailData.tradeCountryCodeOld"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="贸易国别代码（新）">
+                                            <el-input v-model="eciqDetailData.tradeCountryCodeNew"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="启运国家代码（原）">
+                                            <el-input v-model="eciqDetailData.despCtryCodeOld"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="启运国家代码（新）">
+                                            <el-input v-model="eciqDetailData.despCtryCodeNew"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="特种业务标识">
+                                            <el-input v-model="eciqDetailData.specDeclFlag"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="目的机构代码">
+                                            <el-input v-model="eciqDetailData.purpOrgCode"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="申请单证代码串">
+                                            <el-input v-model="eciqDetailData.appCertCode"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="申请单证正本数">
+                                            <el-input v-model="eciqDetailData.applOri"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="申请单证副本数">
+                                            <el-input v-model="eciqDetailData.applCopyQuan"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="申请单证名称">
+                                            <el-input v-model="eciqDetailData.appCertName"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="报检类别代码">
+                                            <el-input v-model="eciqDetailData.declCode"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="报检日期">
+                                            <el-input v-model="eciqDetailData.declDate"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="特殊通关模式">
+                                            <el-input v-model="eciqDetailData.specPassFlag"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="随附单据名称串">
+                                            <el-input v-model="eciqDetailData.attaCollectName"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="货物总值（美元）">
+                                            <el-input v-model="eciqDetailData.totalValUs"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="货物总值（人民币）">
+                                            <el-input v-model="eciqDetailData.totalValCn"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="集装箱适载核销状态">
+                                            <el-input v-model="eciqDetailData.contCancelFlag"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="卸毕日期">
+                                            <el-input v-model="eciqDetailData.cmplDschrgDt"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="关联报检号">
+                                            <el-input v-model="eciqDetailData.correlationDeclNo"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="关联理由">
+                                            <el-input v-model="eciqDetailData.correlationReasonFlag"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="特殊检验检疫要求">
+                                            <el-input v-model="eciqDetailData.speclInspQuraRe"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="疫情代码">
+                                            <el-input v-model="eciqDetailData.situationCode"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="疫情级别">
+                                            <el-input v-model="eciqDetailData.situationLevel"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="出入境类别">
+                                            <el-input v-if="eciqDetailData.aplKind=='I'" value="进区"></el-input>
+                                            <el-input v-if="eciqDetailData.aplKind=='E'" value="出区"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="领证地">
+                                            <el-input v-model="eciqDetailData.vsaOrgCode"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="原集装箱标识">
+                                            <el-input v-model="eciqDetailData.origBoxFlag"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="软件商类型">
+                                            <el-input v-model="eciqDetailData.softType"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="报检单ID">
+                                            <el-input v-model="eciqDetailData.declId"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="通讯账号名称">
+                                            <el-input v-model="eciqDetailData.spare1"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="通讯账号认证方式">
+                                            <el-input v-model="eciqDetailData.spare3"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="通讯证书ID">
+                                            <el-input v-model="eciqDetailData.spare4"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                                <el-row>
+                                    <el-col :span="6">
+                                        <el-form-item label="创建时间">
+                                            <el-input v-model="eciqDetailData.realtime"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="E号">
+                                            <el-input v-model="eciqDetailData.inspNoE"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                    <el-col :span="6">
+                                        <el-form-item label="电子底账数据号">
+                                            <el-input v-model="eciqDetailData.clBlNo"></el-input>
+                                        </el-form-item>
+                                    </el-col>
+                                </el-row>
+                            </el-form>
+                        </el-card>
+                    </el-collapse-item>
+
+                    <el-collapse-item title="随附单据" name="4">
+                        <el-card class="el-card-define">
+                            <div slot="header">
+                                <el-form id="attForm" ref="" :model="attList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="随附单据编号">
+                                                <el-input v-model="attList.attDocNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="随附单据类别代码">
+                                                <el-input v-model="attList.attDocTypeCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="随附单据名称">
+                                                <el-input v-model="attList.attDocName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="随附单据核销货物序号">
+                                                <el-input v-model="attList.attDocWrtofDetailNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="随附单据核销数量">
+                                                <el-input v-model="attList.attDocWrtofQty"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="随附单据核销后明细余量">
+                                                <el-input v-model="attList.attDocDetailLeft"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="随附单据核销后余量">
+                                                <el-input v-model="attList.attDocWrtofLeft"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclAttList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="attHandleSelectionChange"
+                                        @row-click="attHandleRowClick"
+                                        ref="attTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="attDocNo"
+                                            label="随附单据编号"
+                                            width="160">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="attDocTypeCode"
+                                            label="随附单据类别代码"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="attDocName"
+                                            label="随附单据名称"
+                                            >
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="attDocWrtofDetailNo"
+                                            label="随附单据核销货物序号"
+                                            width="160">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="attDocWrtofQty"
+                                            label="随附单据核销数量"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="attDocDetailLeft"
+                                            label="随附单据核销后明细余量"
+                                            width="160">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="attDocWrtofLeft"
+                                            label="随附单据核销后余量"
+                                            width="160">
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                    <el-collapse-item title="企业资质" name="5">
+                        <el-card class="el-card-define">
+                            <div slot="header">
+                                <el-form id="limitForm" ref="" :model="limitList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="企业资质编号">
+                                                <el-input v-model="limitList.entQualifNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="企业资质类别代码">
+                                                <el-input v-model="limitList.entQualifTypeCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="企业资质类别名称">
+                                                <el-input v-model="limitList.entQualifName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="企业组织机构代码">
+                                                <el-input v-model="limitList.entOrgCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="归档标志">
+                                                <el-input v-model="limitList.falgArchive"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="企业名称">
+                                                <el-input v-model="limitList.entName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclLimitList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="limitHandleSelectionChange"
+                                        @row-click="limitHandleRowClick"
+                                        ref="limitTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="entQualifNo"
+                                            label="企业资质编号"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="entQualifTypeCode"
+                                            label="企业资质类别代码"
+                                            width="160">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="entQualifName"
+                                            label="企业资质类别名称"
+                                            >
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="entOrgCode"
+                                            label="企业组织机构代码"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="falgArchive"
+                                            label="归档标志"
+                                            width="160">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="entName"
+                                            label="企业名称"
+                                            width="200">
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                    <el-collapse-item title="使用人信息" name="6">
+                        <el-card class="el-card-define">
+                            <div slot="header">
+                                <el-form id="userForm" ref="" :model="userList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="使用人代码">
+                                                <el-input v-model="userList.consumerUsrCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="使用人名称">
+                                                <el-input v-model="userList.userName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="使用单位联系人">
+                                                <el-input v-model="userList.useOrgPersonCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="使用单位联系电话">
+                                                <el-input v-model="userList.useOrgPersonTel"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclUserList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="userHandleSelectionChange"
+                                        @row-click="userHandleRowClick"
+                                        ref="userTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="consumerUsrCode"
+                                            label="使用人代码"
+                                            width="160">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="userName"
+                                            label="使用人名称"
+                                            >
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="useOrgPersonCode"
+                                            label="使用单位联系人"
+                                            width="240">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="useOrgPersonTel"
+                                            label="使用单位联系电话"
+                                            width="200">
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                    <el-collapse-item title="标记号码附件" name="7">
+                        <el-card class="el-card-define">
+                            <div slot="header">
+                                <el-form id="markLobForm" ref="" :model="markLobList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="8">
+                                            <el-form-item label="附件名称">
+                                                <el-input v-model="markLobList.attachName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <el-form-item label="附件类型">
+                                                <el-input v-model="markLobList.attachType"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <el-form-item label="附件路径">
+                                                <el-input v-model="markLobList.attachmentPath"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclMarkLobList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="markLobHandleSelectionChange"
+                                        @row-click="markLobHandleRowClick"
+                                        ref="markLobTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="attachName"
+                                            label="附件名称">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="attachType"
+                                            label="附件类型"
+                                            width="180">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="attachmentPath"
+                                            label="附件路径"
+                                            width="350">
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                </el-collapse>
+            </el-tab-pane>
+            <el-tab-pane label="货物信息" name="declGoods">
+                <el-collapse v-model="collapseGoodsNames" @change="collapseGoodsHandleChange">
+                    <el-collapse-item title="货物信息" name="1">
+                        <el-card class="el-card-define">
+                            <div slot="header">
+                                <el-form id="goodsForm" ref="" :model="goodsList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="企业报检号">
+                                                <el-input v-model="goodsList.entDeclNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="货物序号">
+                                                <el-input v-model="goodsList.goodsNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="单价">
+                                                <el-input v-model="goodsList.pricePerUnit"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="HS编号">
+                                                <el-input v-model="goodsList.prodHsCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="HS编码描述">
+                                                <el-input v-model="goodsList.hsCodeDesc"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="数量">
+                                                <el-input v-model="goodsList.qty"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="数量计量单位">
+                                                <el-input v-model="goodsList.qtyMeasUnit"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="重量">
+                                                <el-input v-model="goodsList.weight"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="重量计量单位">
+                                                <el-input v-model="goodsList.wtMeasUnit"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="CIQ代码">
+                                                <el-input v-model="goodsList.ciqCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="CIQ名称">
+                                                <el-input v-model="goodsList.ciqName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="币种代码（原代码）">
+                                                <el-input v-model="goodsList.currencyOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="币种代码（新代码）">
+                                                <el-input v-model="goodsList.currencyNew"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="危险货物名称">
+                                                <el-input v-model="goodsList.dangName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="申报货物名称（中文）">
+                                                <el-input v-model="goodsList.declGoodsCname"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="申报货物名称（外文）">
+                                                <el-input v-model="goodsList.declGoodsEname"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="境外生产企业名称">
+                                                <el-input v-model="goodsList.engManEntCnm"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="货物属性代码">
+                                                <el-input v-model="goodsList.goodsAttr"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="货物品牌">
+                                                <el-input v-model="goodsList.goodsBrand"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="货物型号">
+                                                <el-input v-model="goodsList.goodsModel"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="货物规格">
+                                                <el-input v-model="goodsList.goodsSpec"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="货物总值">
+                                                <el-input v-model="goodsList.goodsTotalVal"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="检验检疫类别">
+                                                <el-input v-model="goodsList.inspType"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="生产单位名称">
+                                                <el-input v-model="goodsList.mnufctrRegName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="生产单位注册号">
+                                                <el-input v-model="goodsList.mnufctrRegNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="非危险化学品">
+                                                <el-input v-model="goodsList.noDangFlag"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="原产国/地区（原）">
+                                                <el-input v-model="goodsList.oriCtryCodeOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="原产国/地区（新）">
+                                                <el-input v-model="goodsList.oriCtryCodeNew"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="原产地区代码（原）">
+                                                <el-input v-model="goodsList.origPlaceCodeOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="原产地区代码（新）">
+                                                <el-input v-model="goodsList.origPlaceCodeNew"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="危包规格">
+                                                <el-input v-model="goodsList.packSpec"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="危包类别">
+                                                <el-input v-model="goodsList.packType"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="生产批号">
+                                                <el-input v-model="goodsList.prodBatchNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="产品保质期">
+                                                <el-input v-model="goodsList.prodQgp"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="产品有效期">
+                                                <el-input v-model="goodsList.prodValidDt"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="生产日期">
+                                                <el-input v-model="goodsList.produceDate"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="用途代码">
+                                                <el-input v-model="goodsList.purpose"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="标准数量">
+                                                <el-input v-model="goodsList.stdQty"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="标准数量单位">
+                                                <el-input v-model="goodsList.stdQtyUnitCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="标准重量">
+                                                <el-input v-model="goodsList.stdWeight"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="标准重量单位">
+                                                <el-input v-model="goodsList.stdWeightUnitCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="成份/原料/组份">
+                                                <el-input v-model="goodsList.stuff"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="UN编码">
+                                                <el-input v-model="goodsList.unCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="创建时间">
+                                                <el-input v-model="goodsList.realtime"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclGoodsList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="goodsHandleSelectionChange"
+                                        @row-click="goodsHandleRowClick"
+                                        ref="goodsTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="goodsNo"
+                                            label="货物序号"
+                                            width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="prodHsCode"
+                                            label="HS编号"
+                                            width="180">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="declGoodsCname"
+                                            label="申报货物名称（中文）"
+                                            >
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="goodsSpec"
+                                            label="货物规格"
+                                            width="200">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="pricePerUnit"
+                                            label="单价"
+                                            width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="qty"
+                                            label="数量"
+                                            width="80">
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                    <el-collapse-item title="包装信息" name="2">
+                        <el-card class="el-card-define">
+                            <div slot="header">
+                                <el-form id="goodsPackForm" ref="" :model="goodsPackList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="货物序号">
+                                                <el-input v-model="goodsPackList.goodsNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="辅助包装材料长">
+                                                <el-input v-model="goodsPackList.packLenth"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="辅助包装材料高">
+                                                <el-input v-model="goodsPackList.packHigh"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="辅助包装材料宽">
+                                                <el-input v-model="goodsPackList.packWide"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="辅助包装材料种类（原代码）">
+                                                <el-input v-model="goodsPackList.packTypeCodeOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="辅助包装材料种类（新代码）">
+                                                <el-input v-model="goodsPackList.packTypeCodeNew"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="包装种类名称">
+                                                <el-input v-model="goodsPackList.packCatgName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="包装种类中文简称">
+                                                <el-input v-model="goodsPackList.packTypeShort"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="包装件数">
+                                                <el-input v-model="goodsPackList.packQty"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="是否主要包装">
+                                                <el-input v-model="goodsPackList.isMainPack"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="包装材料种类">
+                                                <el-input v-model="goodsPackList.matType"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="加工厂家">
+                                                <el-input v-model="goodsPackList.procFactory"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclGoodsPackList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="goodsPackHandleSelectionChange"
+                                        @row-click="goodsPackHandleRowClick"
+                                        ref="goodsPackTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="goodsNo"
+                                            label="货物序号"
+                                            width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="packLenth"
+                                            label="辅助包装材料长"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="packHigh"
+                                            label="辅助包装材料高"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="packWide"
+                                            label="辅助包装材料宽"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="packCatgName"
+                                            label="包装种类名称"
+                                            width="250">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="packTypeShort"
+                                            label="包装种类中文简称"
+                                            >
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                    <el-collapse-item title="许可证信息" name="3">
+                        <el-card class="el-card-define">
+                            <div slot="header">
+                                <el-form id="goodsLimitForm" ref="" :model="goodsLimitList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="货物序号">
+                                                <el-input v-model="goodsLimitList.goodsNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="许可证类别代码">
+                                                <el-input v-model="goodsLimitList.licTypeCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="许可证编号">
+                                                <el-input v-model="goodsLimitList.licenceNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="许可证类别名称">
+                                                <el-input v-model="goodsLimitList.licName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="许可证核销明细序号">
+                                                <el-input v-model="goodsLimitList.licWrtofDetailNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="许可证核销数量">
+                                                <el-input v-model="goodsLimitList.licWrtofQty"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="许可证核销明细余量">
+                                                <el-input v-model="goodsLimitList.licDetailLeft"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="许可证核销后余量">
+                                                <el-input v-model="goodsLimitList.licWrtofLeft"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclGoodsLimitList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="goodsLimitHandleSelectionChange"
+                                        @row-click="goodsLimitHandleRowClick"
+                                        ref="goodsLimitTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="goodsNo"
+                                            label="货物序号"
+                                            width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="licenceNo"
+                                            label="许可证编号"
+                                            width="160">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="licName"
+                                            label="许可证类别名称"
+                                            >
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="licWrtofDetailNo"
+                                            label="许可证核销明细序号"
+                                            width="160">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="licWrtofQty"
+                                            label="许可证核销数量"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="licDetailLeft"
+                                            label="许可证核销明细余量"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="licWrtofLeft"
+                                            label="许可证核销后余量"
+                                            width="140">
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                    <el-collapse-item title="许可证VIN信息" name="4">
+                        <el-card  class="el-card-define">
+                            <div slot="header">
+                                <el-form id="goodsLimitVinForm" ref="" :model="goodsLimitVinList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="许可证类别代码">
+                                                <el-input v-model="goodsLimitVinList.licTypeCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="许可证编号">
+                                                <el-input v-model="goodsLimitVinList.licenceNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="货物序号">
+                                                <el-input v-model="goodsLimitVinList.goodsNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="VIN序号">
+                                                <el-input v-model="goodsLimitVinList.vinNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="提/运单日期">
+                                                <el-input v-model="goodsLimitVinList.billLadDate"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="质量保质期">
+                                                <el-input v-model="goodsLimitVinList.qualityQgp"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="发动机号或电机号">
+                                                <el-input v-model="goodsLimitVinList.motorNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="车辆识别代码（VIN）">
+                                                <el-input v-model="goodsLimitVinList.vinCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="底盘(车架)号">
+                                                <el-input v-model="goodsLimitVinList.chassisNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="发票所列数量">
+                                                <el-input v-model="goodsLimitVinList.invoiceNum"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="单价">
+                                                <el-input v-model="goodsLimitVinList.pricePerUnit"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="品名（中文名称）">
+                                                <el-input v-model="goodsLimitVinList.prodCnnm"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="品名（英文名称）">
+                                                <el-input v-model="goodsLimitVinList.prodEnnm"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="型号(英文)">
+                                                <el-input v-model="goodsLimitVinList.modelEn"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclGoodsLimitVnList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="goodsLimitVinHandleSelectionChange"
+                                        @row-click="goodsLimitVinHandleRowClick"
+                                        ref="goodsLimitVinTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="licenceNo"
+                                            label="许可证编号"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="goodsNo"
+                                            label="货物序号"
+                                            width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="vinNo"
+                                            label="VIN序号"
+                                            width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="motorNo"
+                                            label="发动机号或电机号"
+                                            width="160">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="chassisNo"
+                                            label="底盘(车架)号"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="invoiceNum"
+                                            label="发票所列数量"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="pricePerUnit"
+                                            label="单价"
+                                            width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="prodCnnm"
+                                            label="品名（中文名称）"
+                                            >
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                    <el-collapse-item title="集装箱对应关系" name="5">
+                        <el-card  class="el-card-define">
+                            <div slot="header">
+                                <el-form id="goodsContForm" ref="" :model="goodsContList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="货物序号">
+                                                <el-input v-model="goodsContList.goodsNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱规格代码（原代码）">
+                                                <el-input v-model="goodsContList.cntnrModeCodeOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱号码">
+                                                <el-input v-model="goodsContList.contCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="HS编号">
+                                                <el-input v-model="goodsContList.prodHsCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="数量">
+                                                <el-input v-model="goodsContList.qty"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="数量计量单位">
+                                                <el-input v-model="goodsContList.qtyMeasUnit"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="重量">
+                                                <el-input v-model="goodsContList.weight"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="重量计量单位">
+                                                <el-input v-model="goodsContList.wtUnitCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="标准计量单位">
+                                                <el-input v-model="goodsContList.stdMeasUnit"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="标准计量单位数量">
+                                                <el-input v-model="goodsContList.stdMeasUnitQyt"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="运输工具类型代码">
+                                                <el-input v-model="goodsContList.transMeansType"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱规格代码（新代码）">
+                                                <el-input v-model="goodsContList.cntnrModeCodeNew"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclGoodsContList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="goodsContHandleSelectionChange"
+                                        @row-click="goodsContHandleRowClick"
+                                        ref="goodsContTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="goodsNo"
+                                            label="货物序号"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="contCode"
+                                            label="集装箱号码"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="prodHsCode"
+                                            label="HS编号"
+                                            width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="qty"
+                                            label="数量"
+                                            width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="qtyMeasUnit"
+                                            label="数量计量单位"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="weight"
+                                            label="重量"
+                                            width="80">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="wtUnitCode"
+                                            label="重量计量单位"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="stdMeasUnitQyt"
+                                            label="标准计量单位数量"
+                                            >
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="stdMeasUnit"
+                                            label="标准计量单位"
+                                            width="140">
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                </el-collapse>
+            </el-tab-pane>
+            <el-tab-pane label="集装箱信息" name="declCont">
+                <el-collapse v-model="collapseContNames" @change="collapseContHandleChange">
+                    <el-collapse-item title="集装箱信息" name="1">
+                        <el-card  class="el-card-define">
+                            <div slot="header">
+                                <el-form id="contForm" ref="" :model="contList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱序号">
+                                                <el-input v-model="contList.seqNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱规格代码（原代码）">
+                                                <el-input v-model="contList.cntnrModeCodeOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱规格代码（新代码）">
+                                                <el-input v-model="contList.cntnrModeCodeNew"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱数量">
+                                                <el-input v-model="contList.containerQty"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="拼箱标识">
+                                                <el-input v-model="contList.lclFlag"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱箱号串">
+                                                <el-input v-model="contList.contNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclContList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="contHandleSelectionChange"
+                                        @row-click="contHandleRowClick"
+                                        ref="contTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="seqNo"
+                                            label="集装箱序号"
+                                            width="120">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="cntnrModeCodeOld"
+                                            label="集装箱规格代码（原代码）"
+                                            width="210">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="cntnrModeCodeNew"
+                                            label="集装箱规格代码（新代码）"
+                                            width="210">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="containerQty"
+                                            label="集装箱数量"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="lclFlag"
+                                            label="拼箱标识"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="contNo"
+                                            label="集装箱箱号串"
+                                            >
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                    <el-collapse-item title="集装箱号明细" name="2">
+                        <el-card  class="el-card-define">
+                            <div slot="header">
+                                <el-form id="contForm" ref="" :model="contDetailList" label-width="120px"
+                                         size="mini" label-position="right">
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱序号">
+                                                <el-input v-model="contDetailList.seqNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱规格代码（原代码）">
+                                                <el-input v-model="contDetailList.cntnrModeCodeOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱规格代码（新代码）">
+                                                <el-input v-model="contDetailList.cntnrModeCodeNew"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="拼箱标识">
+                                                <el-input v-model="contDetailList.lclFlag"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="集装箱箱号串">
+                                                <el-input v-model="contDetailList.contNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-table
+                                        :data="eciqDetailData.dxpEciqDeclContDetailList"
+                                        border
+                                        stripe
+                                        fit
+                                        @selection-change="contDetailHandleSelectionChange"
+                                        @row-click="contDetailHandleRowClick"
+                                        ref="contDetailTable"
+                                        width="100%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55"
+                                            align="center">
+                                    </el-table-column>
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="seqNo"
+                                            label="集装箱序号"
+                                            width="130">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="cntnrModeCodeOld"
+                                            label="集装箱规格代码（原代码）"
+                                            width="220">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="cntnrModeCodeNew"
+                                            label="集装箱规格代码（新代码）"
+                                            width="220">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="lclFlag"
+                                            label="拼箱标识"
+                                            width="150">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="contNo"
+                                            label="集装箱箱号串"
+                                    >
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </el-card>
+                    </el-collapse-item>
+                </el-collapse>
+            </el-tab-pane>
+        </el-tabs>
+    </el-dialog>
+
+    <el-dialog title="回执信息" v-if="eciqResultVisible" :visible.sync="eciqResultVisible" width="80%" top="6vh">
+        <el-table
+                :data="eciqResultData"
+                border
+                stripe
+                fit
+                size="mini"
+        >
+            <el-table-column
+                    type="index"
+                    label="序号"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="cusCiqNo"
+                    label="企业报检号"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="entDealNo"
+                    label="检验检疫编号/检验检疫申请号"
+                    width="200">
+            </el-table-column>
+            <el-table-column
+                    prop="clBlNo"
+                    label="电子底账数据号"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="operTime"
+                    label="生成时间"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="rspCodes"
+                    label="代码"
+                    width="80">
+            </el-table-column>
+            <el-table-column
+                    prop="rspInfo"
+                    label="描述"
+                    >
+            </el-table-column>
+        </el-table>
+
+    </el-dialog>
+
+
+
+</div>
+</body>
+<script type="text/javascript" src="js/vue/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
+<script type="text/javascript" src="js/axios.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript">
+    var eciq = new Vue({
+        el: '#eciq',
+        data: {
+            form: {
+                entDeclNo:'',
+                tradeModeCode:'',
+                createDateFrom:'',
+                createDateTo:''
+            },
+            eciqTable: [],
+            eciqDetailData: {},
+            eciqResultData: {},
+            tableHeight: '',
+            currPage: 0,
+            totals: 0,
+            pageSizeSelect: 10,
+            pageNum: 1,
+            eciqVisible:false,
+            eciqResultVisible:false,
+            title:'',
+            tabsName: 'decl',
+            collapseNames: ['1','2','3','4','5','6','7'],
+            collapseGoodsNames: ['1','2','3','4','5'],
+            collapseContNames: ['1','2'],
+            //商品信息回填
+            goodsList: {},
+            //商品包装信息回填
+            goodsPackList: {},
+            //商品许可证信息回填
+            goodsLimitList: {},
+            //商品许可证VIN信息回填
+            goodsLimitVinList: {},
+            //商品货物与集装箱关联信息回填
+            goodsContList: {},
+            //集装箱信息回填
+            contList: {},
+            //集装箱明细信息回填
+            contDetailList: {},
+            //随附单证信息回填
+            attList: {},
+            //企业资质信息回填
+            limitList: {},
+            //使用人信息回填
+            userList: {},
+            //标记号码附件信息回填
+            markLobList: {},
+            eciqForm:{
+
+
+            },
+            //贸易方式代码
+            baseTradeModeList:[],
+        },
+        created() {
+            this._getTableHeight()
+        },
+        mounted() {
+            let _this = this;
+            window.onresize = () => {
+                if (_this.resizeFlag) {
+                    clearTimeout(_this.resizeFlag)
+                }
+                _this.resizeFlag = setTimeout(() => {
+                    _this._getTableHeight()
+                    _this.resizeFlag = null
+                }, 100)
+            };
+            //获得贸易方式代码列表
+            this.listTradeModeCode();
+            _this.init();
+        },
+        methods: {
+            init: function () {
+                var params = this.form;
+                params.pageSize = this.pageSizeSelect;
+                params.pageNum = this.pageNum;
+                request.post('eciqController/list', params).then((r) => {
+                    if (r.data.success) {
+                        this.eciqTable = r.data.data.records;
+                        this.currPage = r.data.data.current;
+                        this.totals = r.data.data.total;
+                    }
+                    this.pageNum=1;
+                });
+            },
+            handleCurrentChange: function (val) {
+                this.pageNum = val;
+                this.form = {
+                    entDeclNo:'',
+                    tradeModeCode:'',
+                    createDateFrom:'',
+                    createDateTo:''
+                };
+                this.init();
+            },
+            //计算table高度
+            _getTableHeight() {
+                let tableH = 180;
+                let tableHeightDetil = window.innerHeight - tableH;
+                if (tableHeightDetil <= 300) {
+                    this.tableHeight = 300
+                } else {
+                    this.tableHeight = window.innerHeight - tableH
+                }
+            },
+            // 重置检索条件
+            reset: function(){
+                if (this.$refs['form'] != undefined) {
+                    this.form = {
+                        entDeclNo:'',
+                        tradeModeCode:'',
+                        createDateFrom:'',
+                        createDateTo:''
+                    };
+                    this.$refs['form'].resetFields();
+                }
+            },
+
+            //详细按钮
+            view: function (row) {
+                request.post('eciqController/getDetailByEntDeclNo', {'entDeclNo':row.entDeclNo}).then((r) => {
+                    if (r.data.success) {
+                        this.eciqDetailData = r.data.data;
+                        this.eciqVisible = true;
+                    } else {
+                        eciq.$message.error(r.data.message);
+                    }
+                });
+            },
+
+            //查看回执按钮
+            viewResult: function (row) {
+                //查询报检单回执
+                request.post('eciqController/listResultByEntDeclNo', {'entDeclNo':row.entDeclNo}).then((r) => {
+                    if (r.data.success) {
+                        this.eciqResultData = r.data.data;
+                        this.eciqResultVisible = true;
+                    } else {
+                        eciq.$message.error(r.data.message);
+                    }
+                });
+            },
+
+
+            // 取消
+            cancel: function () {
+                this.eciqVisible = false;
+                this.tabsName = 'decl';
+                this.collapseNames = ['1','2','3','4','5','6','7'];
+                this.collapseGoodsNames = ['1','2','3','4','5'];
+                this.collapseContNames = ['1','2'];
+                //初始化
+                this.goodsList = {};
+                this.goodsPackList = {};
+                this.goodsLimitList = {};
+                this.goodsLimitVinList = {};
+                this.goodsContList = {};
+                this.contList = {};
+                this.contDetailList = {};
+                this.attList = {};
+                this.limitList = {};
+                this.userList = {};
+                this.markLobList= {};
+            },
+
+            tabsHandleClick(tab, event) {
+
+            },
+
+            collapseHandleChange(val) {
+
+            },
+
+            collapseGoodsHandleChange(val) {
+
+            },
+
+            collapseContHandleChange(val) {
+
+            },
+
+            // 商品信息单选框选中数据
+            goodsHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.goodsTable.clearSelection();
+                    this.$refs.goodsTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.goodsList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 商品信息点击选中行
+            goodsHandleRowClick(row,column,event){
+                this.$refs.goodsTable.toggleRowSelection(row);
+            },
+
+            // 商品包装信息单选框选中数据
+            goodsPackHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.goodsPackTable.clearSelection();
+                    this.$refs.goodsPackTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.goodsPackList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 商品包装信息信息点击选中行
+            goodsPackHandleRowClick(row,column,event){
+                this.$refs.goodsPackTable.toggleRowSelection(row);
+            },
+
+
+            // 商品许可证信息单选框选中数据
+            goodsLimitHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.goodsLimitTable.clearSelection();
+                    this.$refs.goodsLimitTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.goodsLimitList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 商品许可证信息信息点击选中行
+            goodsLimitHandleRowClick(row,column,event){
+                this.$refs.goodsLimitTable.toggleRowSelection(row);
+            },
+
+            // 商品许可证Vin信息单选框选中数据
+            goodsLimitVinHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.goodsLimitVinTable.clearSelection();
+                    this.$refs.goodsLimitVinTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.goodsLimitVinList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 商品许可证Vin信息点击选中行
+            goodsLimitVinHandleRowClick(row,column,event){
+                this.$refs.goodsLimitVinTable.toggleRowSelection(row);
+            },
+
+            // 货物与集装箱关联信息单选框选中数据
+            goodsContHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.goodsContTable.clearSelection();
+                    this.$refs.goodsContTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.goodsContList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 货物与集装箱关联信息点击选中行
+            goodsContHandleRowClick(row,column,event){
+                this.$refs.goodsContTable.toggleRowSelection(row);
+            },
+
+            // 集装箱信息单选框选中数据
+            contHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.contTable.clearSelection();
+                    this.$refs.contTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.contList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 集装箱信息点击选中行
+            contHandleRowClick(row,column,event){
+                this.$refs.contTable.toggleRowSelection(row);
+            },
+
+            // 集装箱明细信息单选框选中数据
+            contDetailHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.contDetailTable.clearSelection();
+                    this.$refs.contDetailTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.contDetailList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 集装箱明细信息点击选中行
+            contDetailHandleRowClick(row,column,event){
+                this.$refs.contDetailTable.toggleRowSelection(row);
+            },
+
+            // 随附单证信息单选框选中数据
+            attHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.attTable.clearSelection();
+                    this.$refs.attTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.attList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 随附单证信息点击选中行
+            attHandleRowClick(row,column,event){
+                this.$refs.attTable.toggleRowSelection(row);
+            },
+
+            // 企业资质信息单选框选中数据
+            limitHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.limitTable.clearSelection();
+                    this.$refs.limitTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.limitList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 企业资质信息点击选中行
+            limitHandleRowClick(row,column,event){
+                this.$refs.limitTable.toggleRowSelection(row);
+            },
+
+            // 使用人信息单选框选中数据
+            userHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.userTable.clearSelection();
+                    this.$refs.userTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.userList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 使用人信息点击选中行
+            userHandleRowClick(row,column,event){
+                this.$refs.userTable.toggleRowSelection(row);
+            },
+
+            // 标记号码附件信息单选框选中数据
+            markLobHandleSelectionChange(selection) {
+                if (selection.length > 1) {
+                    this.$refs.markLobTable.clearSelection();
+                    this.$refs.markLobTable.toggleRowSelection(selection.pop());
+                } else if (selection.length == 1){
+                    this.markLobList = JSON.parse(JSON.stringify(selection[0]));
+                }
+            },
+
+            // 标记号码附件信息点击选中行
+            markLobHandleRowClick(row,column,event){
+                this.$refs.markLobTable.toggleRowSelection(row);
+            },
+
+
+            //获得贸易方式代码列表
+            listTradeModeCode: function (){
+                request.post('eciqController/listTradeModeCode',{}).then((r) => {
+                    if (r.data.success) {
+                        this.baseTradeModeList = r.data.data;
+                    } else {
+                        eciq.$message.error(r.data.message);
+                    }
+                });
+            }
+
+
+
+        }
+    })
+</script>
+<style>
+
+    .el-divider--horizontal {
+        margin: 15px 0;
+    }
+
+    .el-input.is-disabled .el-input__inner {
+        color: #606266;
+    }
+
+    .el-scrollbar__wrap{
+        overflow-x: hidden;
+    }
+
+    .el-select-dropdown .el-scrollbar .el-scrollbar__wrap {
+        overflow: scroll !important;
+    }
+
+    .el-table th.gutter {
+        display: table-cell !important;
+    }
+
+    .el-table colgroup.gutter {
+        display: table-cell !important;
+    }
+
+    .el-upload{
+        width: 100%;
+    }
+    .el-upload .el-upload-dragger{
+        width: 100%;
+    }
+
+    .el-form-item__label  {
+        font-size: 12px;
+    }
+
+    .el-form-item {
+        margin-left: 10px;
+    }
+
+    .el-card-define {
+        min-height: 100%;
+        height: 100%;
+    }
+
+    #searchForm .el-form-item__label {
+        font-size: 14px;
+    }
+
+    #searchForm .el-form-item {
+        margin-left: 0px;
+    }
+
+    .spec-dialog .el-dialog__body {
+        padding: 3px 30px;
+        overflow-y: auto;
+        height: calc(100vh - 160px);
+    }
+
+
+    /*滚动条样式*/
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    /*正常情况下滑块的样式*/
+    ::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+    }
+    /*鼠标悬浮在该类指向的控件上时滑块的样式*/
+    :hover::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+    }
+    /*鼠标悬浮在滑块上时滑块的样式*/
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+    /*正常时候的主干部分*/
+    ::-webkit-scrollbar-track {
+        border-radius: 8px;
+        background-color: white;
+    }
+    /*鼠标悬浮在滚动条上的主干部分*/
+    ::-webkit-scrollbar-track:hover {
+        background-color: rgba(0, 0, 0, 0.01);
+    }
+
+</style>
+</html>

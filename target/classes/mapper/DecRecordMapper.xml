@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.DecRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.dec.DecRecord">
+        <id column="ID" property="id" />
+        <result column="SEQ_NO" property="seqNo" />
+        <result column="XML_PATH" property="xmlPath" />
+        <result column="CUSTOM_MASTER" property="customMaster" />
+        <result column="I_E_PORT" property="iEPort" />
+        <result column="AGENT_CODE_SCC" property="agentCodeScc" />
+        <result column="TRADE_CODE_SCC" property="tradeCodeScc" />
+        <result column="XML_CREAT_TIME" property="xmlCreatTime" />
+        <result column="INSERT_TIME" property="insertTime" />
+        <result column="ENTRY_ID" property="entryId" />
+        <result column="UPDATE_ENTRY_TIME" property="updateEntryTime" />
+    </resultMap>
+
+</mapper>

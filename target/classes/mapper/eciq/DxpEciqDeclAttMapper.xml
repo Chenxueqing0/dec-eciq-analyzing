@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.eciq.DxpEciqDeclAttMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.eciq.DxpEciqDeclAtt">
+        <id column="ID" property="id" />
+        <result column="ENT_DECL_NO" property="entDeclNo" />
+        <result column="ATT_ID" property="attId" />
+        <result column="ATT_DOC_TYPE_CODE" property="attDocTypeCode" />
+        <result column="ATT_DOC_NO" property="attDocNo" />
+        <result column="ATT_DOC_NAME" property="attDocName" />
+        <result column="ATT_DOC_WRTOF_DETAIL_NO" property="attDocWrtofDetailNo" />
+        <result column="ATT_DOC_WRTOF_QTY" property="attDocWrtofQty" />
+        <result column="ATT_DOC_DETAIL_LEFT" property="attDocDetailLeft" />
+        <result column="ATT_DOC_WRTOF_LEFT" property="attDocWrtofLeft" />
+        <result column="REALTIME" property="realtime" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+</mapper>

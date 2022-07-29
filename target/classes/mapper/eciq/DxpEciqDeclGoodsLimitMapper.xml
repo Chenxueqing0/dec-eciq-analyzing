@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.eciq.DxpEciqDeclGoodsLimitMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.eciq.DxpEciqDeclGoodsLimit">
+        <id column="ID" property="id" />
+        <result column="LIMIT_ID" property="limitId" />
+        <result column="ENT_DECL_NO" property="entDeclNo" />
+        <result column="GOODS_ID" property="goodsId" />
+        <result column="GOODS_NO" property="goodsNo" />
+        <result column="LIC_TYPE_CODE" property="licTypeCode" />
+        <result column="LICENCE_NO" property="licenceNo" />
+        <result column="LIC_NAME" property="licName" />
+        <result column="LIC_WRTOF_DETAIL_NO" property="licWrtofDetailNo" />
+        <result column="LIC_WRTOF_QTY" property="licWrtofQty" />
+        <result column="LIC_DETAIL_LEFT" property="licDetailLeft" />
+        <result column="LIC_WRTOF_LEFT" property="licWrtofLeft" />
+        <result column="REALTIME" property="realtime" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+</mapper>

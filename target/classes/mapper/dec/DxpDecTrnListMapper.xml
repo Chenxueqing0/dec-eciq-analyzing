@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.dec.DxpDecTrnListMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.dec.DxpDecTrnList">
+        <id column="ID" property="id" />
+        <result column="TRN_PRE_ID" property="trnPreId" />
+        <result column="TRAF_MODE" property="trafMode" />
+        <result column="SHIP_ID" property="shipId" />
+        <result column="SHIP_NAME_EN" property="shipNameEn" />
+        <result column="VOYAGE_NO" property="voyageNo" />
+        <result column="BILL_NO" property="billNo" />
+        <result column="I_E_DATE" property="iEDate" />
+        <result column="FIELD1" property="field1" />
+        <result column="FIELD2" property="field2" />
+        <result column="FIELD3" property="field3" />
+        <result column="FIELD4" property="field4" />
+        <result column="FIELD5" property="field5" />
+        <result column="REALTIME" property="realtime" />
+        <result column="SEQ_NO" property="seqNo" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+    <insert id="batchInsert" parameterType="list">
+        insert into dxp_dec_trn_list (ID, TRN_PRE_ID, TRAF_MODE, SHIP_ID, SHIP_NAME_EN, VOYAGE_NO,
+        BILL_NO, I_E_DATE, FIELD1, FIELD2, FIELD3, FIELD4, FIELD5,SEQ_NO,COP_MSG_ID)
+        <foreach collection="list" item="item" index="index" separator="union all">
+            select #{item.id},#{item.trnPreId},#{item.trafMode},#{item.shipId},#{item.shipNameEn},#{item.voyageNo},
+            #{item.billNo},#{item.iEDate},#{item.field1},#{item.field2},#{item.field3},#{item.field4},#{item.field5},
+                   #{item.seqNo},#{item.copMsgId}
+            from dual
+        </foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.dec.DxpDecHeadMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.dec.DxpDecHead">
+        <id column="ID" property="id" />
+        <result column="SEQ_NO" property="seqNo" />
+        <result column="I_E_FLAG" property="iEFlag" />
+        <result column="TYPE" property="type" />
+        <result column="AGENT_CODE" property="agentCode" />
+        <result column="AGENT_NAME" property="agentName" />
+        <result column="APPR_NO" property="apprNo" />
+        <result column="BILL_NO" property="billNo" />
+        <result column="CONTR_NO" property="contrNo" />
+        <result column="CUSTOM_MASTER" property="customMaster" />
+        <result column="CUT_MODE" property="cutMode" />
+        <result column="DISTINATE_PORT" property="distinatePort" />
+        <result column="DISTRICT_CODE" property="districtCode" />
+        <result column="FEE_CURR" property="feeCurr" />
+        <result column="FEE_MARK" property="feeMark" />
+        <result column="FEE_RATE" property="feeRate" />
+        <result column="GROSS_WET" property="grossWet" />
+        <result column="I_E_DATE" property="iEDate" />
+        <result column="I_E_PORT" property="iEPort" />
+        <result column="IN_RATIO" property="inRatio" />
+        <result column="INSUR_CURR" property="insurCurr" />
+        <result column="INSUR_MARK" property="insurMark" />
+        <result column="INSUR_RATE" property="insurRate" />
+        <result column="LICENSE_NO" property="licenseNo" />
+        <result column="MANUAL_NO" property="manualNo" />
+        <result column="NET_WT" property="netWt" />
+        <result column="NOTE_S" property="noteS" />
+        <result column="OTHER_CURR" property="otherCurr" />
+        <result column="OTHER_MARK" property="otherMark" />
+        <result column="OTHER_RATE" property="otherRate" />
+        <result column="OWNER_CODE" property="ownerCode" />
+        <result column="OWNER_NAME" property="ownerName" />
+        <result column="PACK_NO" property="packNo" />
+        <result column="PAY_WAY" property="payWay" />
+        <result column="PAYMENT_MARK" property="paymentMark" />
+        <result column="TRADE_CODE" property="tradeCode" />
+        <result column="TRADE_COUNTRY" property="tradeCountry" />
+        <result column="TRADE_MODE" property="tradeMode" />
+        <result column="TRADE_NAME" property="tradeName" />
+        <result column="TRAF_MODE" property="trafMode" />
+        <result column="TRAF_NAME" property="trafName" />
+        <result column="TRANS_MODE" property="transMode" />
+        <result column="WRAP_TYPE" property="wrapType" />
+        <result column="ENTRY_ID" property="entryId" />
+        <result column="PRE_ENTRY_ID" property="preEntryId" />
+        <result column="COP_NAME" property="copName" />
+        <result column="COP_CODE" property="copCode" />
+        <result column="ENTRY_TYPE" property="entryType" />
+        <result column="INPUT_DATE" property="inputDate" />
+        <result column="TYPIST_NO" property="typistNo" />
+        <result column="INPUTER_NAME" property="inputerName" />
+        <result column="DECL_TRN_REL" property="declTrnRel" />
+        <result column="CHK_SURETY" property="chkSurety" />
+        <result column="BILL_TYPE" property="billType" />
+        <result column="AGENT_CODE_SCC" property="agentCodeScc" />
+        <result column="OWNER_CODE_SCC" property="ownerCodeScc" />
+        <result column="TRADE_CODE_SCC" property="tradeCodeScc" />
+        <result column="COP_CODE_SCC" property="copCodeScc" />
+        <result column="PROMISE_ITMES" property="promiseItmes" />
+        <result column="TRADE_AREA_CODE" property="tradeAreaCode" />
+        <result column="CHECK_FLOW" property="checkFlow" />
+        <result column="VOY_NO" property="voyNo" />
+        <result column="REALTIME" property="realtime" />
+        <result column="CLEARANCE_DATE" property="clearanceDate" />
+        <result column="RELEASE_DATE" property="releaseDate" />
+        <result column="UPDATE_TIME" property="updateTime" />
+        <result column="CHECK_DATE" property="checkDate" />
+        <result column="FIELD1" property="field1" />
+        <result column="FIELD2" property="field2" />
+        <result column="FIELD3" property="field3" />
+        <result column="FIELD4" property="field4" />
+        <result column="FIELD5" property="field5" />
+        <result column="FIELD6" property="field6" />
+        <result column="FIELD7" property="field7" />
+        <result column="FIELD8" property="field8" />
+        <result column="FIELD9" property="field9" />
+        <result column="FIELD10" property="field10" />
+
+        <result column="TRADE_COUNTRY_OLD" property="tradeCountryOld" />
+        <result column="TRADE_AREA_CODE_OLD" property="tradeAreaCodeOld" />
+        <result column="DISTINATE_PORT_OLD" property="distinatePortOld" />
+        <result column="WRAP_TYPE_OLD" property="wrapTypeOld" />
+        <result column="FEE_CURR_OLD" property="feeCurrOld" />
+        <result column="INSUR_CURR_OLD" property="insurCurrOld" />
+        <result column="OTHER_CURR_OLD" property="otherCurrOld" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+    <select id="getDxpDecHead" resultType="com.data.entity.dec.DxpDecHead">
+        select *
+        from (select t.id, t.seq_no, t1.entry_id
+              from dxp_dec_head t
+                       inner join (select *
+                                   from (select b.*,
+                                                (row_number()
+                                                    over(partition by cus_ciq_no order by REALTIME desc)) px
+                                         from DXP_DEC_RESULT b
+                                         where b.entry_id is not null)
+                                   where px = 1) t1
+                                  on t1.cus_ciq_no = t.seq_no
+              where t.entry_id is null)
+        where rownum &lt;= 9600
+    </select>
+
+</mapper>

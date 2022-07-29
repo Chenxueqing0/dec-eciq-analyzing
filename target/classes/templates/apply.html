@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>申请记录</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.6/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="apply" style="text-align: center;margin: 0 10px 0 10px">
+    <el-divider content-position="left">检索条件</el-divider>
+    <el-form ref="form" :model="form" label-width="140px">
+        <el-row type="flex" justify="center">
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="授权组织机构代码" prop="authCodeScc" style="margin-bottom: 0px;width: 250px">
+                    <el-input size="mini" v-model="form.authCodeScc" placeholder="请输入内容" style="width: 180px;"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="授权标识" prop="authFlag" style="margin-bottom: 0px;">
+                    <el-select v-model="form.authFlag" placeholder="请选择" size="mini" style="width: 180px;">
+                        <el-option label="申请中" value="0"></el-option>
+                        <el-option label="已授权" value="1"></el-option>
+                        <el-option label="拒绝授权" value="2"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-col>
+            <el-col :span="10" style="text-align: left;">
+                <el-form-item label="创建时间" style="margin-bottom: 0px;">
+                    <el-col :span="12">
+                        <el-date-picker size="mini" type="date" placeholder="选择日期" value-format="yyyy-MM-dd" v-model="form.createDateFrom" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                    <el-col class="line" :span="2">至</el-col>
+                    <el-col :span="10">
+                        <el-date-picker size="mini" placeholder="选择时间" value-format="yyyy-MM-dd" v-model="form.createDateTo" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                </el-form-item>
+            </el-col>
+        </el-row>
+        <el-row type="flex" justify="center">
+            <el-col :span="20" style="text-align: left;">
+                <el-form-item label="数据类型" prop="dataType" style="margin-bottom: 0px;">
+                    <el-select v-model="form.dataType" placeholder="请选择" size="mini" style="width: 180px;">
+                        <el-option label="报关" value="dec"></el-option>
+                        <el-option label="报关回执" value="decRec"></el-option>
+                        <el-option label="报检" value="ciq"></el-option>
+                        <el-option label="报检回执" value="ciqRec"></el-option>
+                        <el-option label="查验" value="check"></el-option>
+                        <el-option label="查验回执" value="checkRec"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-col>
+        </el-row>
+        <el-row type="flex" justify="center">
+            <el-col :span="3" style="text-align: left;margin-top: 6px">
+                <el-button @click="init()" icon="el-icon-search" type="primary" plain size="mini">查询
+                </el-button>
+                <el-button @click="reset()" icon="el-icon-refresh" type="primary" plain size="mini">重置
+                </el-button>
+            </el-col>
+        </el-row>
+    </el-form>
+    <el-divider></el-divider>
+    <el-row>
+        <el-col :span="2">
+            <el-button @click="add()" icon="el-icon-circle-plus-outline" type="primary" plain size="mini">新增
+            </el-button>
+        </el-col>
+    </el-row>
+    <el-row size="mini" style="margin-top: 10px">
+        <el-table
+                :data="applyTable"
+                border
+                stripe
+                fit
+                :height="tableHeight"
+                size="mini"
+        >
+            <el-table-column
+                    type="index"
+                    label="序号"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="authCodeScc"
+                    label="授权组织机构代码"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="authCopName"
+                    label="授权企业名称"
+                    width="260">
+            </el-table-column>
+            <el-table-column
+                    prop="authFlag"
+                    label="授权标识"
+                    width="100">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.authFlag=='0'">申请中</span>
+                    <span v-if="scope.row.authFlag=='1'">已授权</span>
+                    <span v-if="scope.row.authFlag=='2'">拒绝授权</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="createTime"
+                    label="创建时间"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="dataType"
+                    label="数据类型"
+                    width="100">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.dataType=='dec'">报关</span>
+                    <span v-if="scope.row.dataType=='decRec'">报关回执</span>
+                    <span v-if="scope.row.dataType=='ciq'">报检</span>
+                    <span v-if="scope.row.dataType=='ciqRec'">报检回执</span>
+                    <span v-if="scope.row.dataType=='check'">查验</span>
+                    <span v-if="scope.row.dataType=='checkRec'">查验回执</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="authTime"
+                    label="授权时间"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="remark"
+                    label="备注"
+                    >
+            </el-table-column>
+            <el-table-column
+                    label="操作"
+                    width="80">
+                <template slot-scope="scope">
+                    <el-button @click="update(scope.row)" type="primary" plain size="mini" v-if="scope.row.authFlag=='0'?true:false">编辑
+                    </el-button>
+                    <el-button @click="view(scope.row)" type="primary" plain size="mini" v-if="scope.row.authFlag=='0'?false:true">查看
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-row>
+    <div style="text-align: center;position:fixed; bottom:0;width: 100%">
+        <el-pagination
+                @current-change="handleCurrentChange"
+                :current-page.sync="currPage"
+                background
+                :page-size="pageSizeSelect"
+                layout="total, prev, pager, next"
+                :total.sync="totals">
+        </el-pagination>
+    </div>
+    <el-dialog :title="title" v-if="applyVisible" :visible.sync="applyVisible" width="40%" top="6vh" :before-close="cancel">
+        <el-form ref="applyForm" :model="applyForm" :rules="rules" label-width="140px" style="width: 90%">
+            <el-form-item label="统一社会信用代码" prop="authCodeScc">
+                <el-input v-model="applyForm.authCodeScc" @blur="updateCopInfo()"></el-input>
+            </el-form-item>
+            <el-form-item label="企业名称" prop="authCopName">
+                <el-input v-model="applyForm.authCopName" readonly></el-input>
+            </el-form-item>
+            <el-form-item label="数据类型" prop="dataType">
+                <el-select @change="selectChanged" v-model="applyForm.dataType" placeholder="请选择数据类型" style="width:100%">
+                    <el-option label="报关" value="dec"></el-option>
+                    <el-option label="报关回执" value="decRec"></el-option>
+                    <el-option label="报检" value="ciq"></el-option>
+                    <el-option label="报检回执" value="ciqRec"></el-option>
+                    <el-option label="查验" value="check"></el-option>
+                    <el-option label="查验回执" value="checkRec"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="出口公网IP" prop="publicIp">
+                <el-input v-model="applyForm.publicIp"></el-input>
+            </el-form-item>
+            <el-form-item label="查询开始日期" prop="startTime">
+                <el-date-picker
+                        v-model="applyForm.startTime"
+                        type="date"
+                        placeholder="选择日期"
+                        value-format="yyyy-MM-dd"
+                        style="width: 100%">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="主管海关" prop="customMaster"
+                          v-if="sessionData.pLevel=='3' && (applyForm.dataType=='dec' || applyForm.dataType=='decRec' || applyForm.dataType=='check' || applyForm.dataType=='checkRec') ?true:false">
+                <el-input v-model="applyForm.customMaster"></el-input>
+            </el-form-item>
+            <el-form-item label="进出口岸" prop="iEPort" v-if="sessionData.pLevel=='3' && (applyForm.dataType=='dec' || applyForm.dataType=='decRec') ?true:false">
+                <el-input v-model="applyForm.iEPort"></el-input>
+            </el-form-item>
+            <el-form-item label="报检地" prop="orgCode" v-if="sessionData.pLevel=='3' && (applyForm.dataType=='ciq' || applyForm.dataType=='ciqRec') ?true:false">
+                <el-input v-model="applyForm.orgCode"></el-input>
+            </el-form-item>
+            <el-form-item label="口岸机构" prop="inspOrgCode" v-if="sessionData.pLevel=='3' && (applyForm.dataType=='ciq' || applyForm.dataType=='ciqRec') ?true:false">
+                <el-input v-model="applyForm.inspOrgCode"></el-input>
+            </el-form-item>
+            <el-form-item label="备注" prop="remark">
+                <el-input v-model="applyForm.remark" type="textarea" :rows="2"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="submitForm()" v-if="submitBtnVisible?true:false">确定</el-button>
+                <el-button @click="cancel()" v-if="cancelBtnVisible?true:false">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+</div>
+</body>
+<script type="text/javascript" src="js/vue/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
+<script type="text/javascript" src="js/axios.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript">
+    var apply = new Vue({
+        el: '#apply',
+        data: {
+            form: {
+                authCodeScc:'',
+                dataType:'',
+                authFlag:'',
+                createDateFrom:'',
+                createDateTo:''
+            },
+            applyTable: [],
+            tableHeight: '',
+            currPage: 0,
+            totals: 0,
+            pageSizeSelect: 10,
+            pageNum: 1,
+            applyVisible:false,
+            title:'',
+            submitBtnVisible:true,
+            cancelBtnVisible:true,
+            operationType:'',
+            sessionData: {},
+            applyForm:{
+                //主键
+                id:'',
+                authUserId:'',
+                authCodeScc:'',
+                authCopName:'',
+                dataType:'',
+                remark:'',
+                customMaster:'',
+                iEPort:'',
+                orgCode:'',
+                inspOrgCode:'',
+                publicIp:'',
+                startTime:'',
+            },
+            rules: {
+                authCodeScc: [
+                    { required: true, message: "请输入统一信用代码", trigger: "blur" },
+                ],
+                authCopName: [
+                    { required: true, message: "请输入企业名称", trigger: "blur" },
+                ],
+                dataType: [
+                    { required: true, message: "请选择数据类型", trigger: "change" },
+                ],
+                publicIp: [
+                    { required: true, message: "请输入出口公网IP", trigger: "blur" },
+                ],
+                startTime: [
+                    { required: true, message: "请输入查询开始日期", trigger: "change" },
+                ],
+                customMaster: [
+                    { required: true, message: "请输入主管海关", trigger: "blur" },
+                ],
+                iEPort: [
+                    { required: true, message: "请输入进出口岸", trigger: "blur" },
+                ],
+                orgCode: [
+                    { required: true, message: "请输入报检地", trigger: "blur" },
+                ],
+                inspOrgCode: [
+                    { required: true, message: "请输入口岸机构", trigger: "blur" },
+                ]
+            }
+        },
+        created() {
+            this._getTableHeight();
+            //获取后台session的值
+            var pLevel = '[[${session.pLevel}]]';
+            this.sessionData.pLevel = pLevel;
+        },
+        mounted() {
+            let _this = this;
+            window.onresize = () => {
+                if (_this.resizeFlag) {
+                    clearTimeout(_this.resizeFlag)
+                }
+                _this.resizeFlag = setTimeout(() => {
+                    _this._getTableHeight()
+                    _this.resizeFlag = null
+                }, 100)
+            };
+            _this.init();
+        },
+        methods: {
+            init: function () {
+                var params = this.form;
+                params.pageSize = this.pageSizeSelect;
+                params.pageNum = this.pageNum;
+                request.post('applyController/list', params).then((r) => {
+                    if (r.data.success) {
+                        this.applyTable = r.data.data.records;
+                        this.currPage = r.data.data.current;
+                        this.totals = r.data.data.total;
+                    }
+                    this.pageNum=1;
+                });
+            },
+            handleCurrentChange: function (val) {
+                this.pageNum = val;
+                this.form = {
+                    authCodeScc:'',
+                    dataType:'',
+                    authFlag:'',
+                    createDateFrom:'',
+                    createDateTo:''
+                };
+                this.init();
+            },
+            //计算table高度
+            _getTableHeight() {
+                let tableH = 260;
+                let tableHeightDetil = window.innerHeight - tableH;
+                if (tableHeightDetil <= 300) {
+                    this.tableHeight = 300
+                } else {
+                    this.tableHeight = window.innerHeight - tableH
+                }
+            },
+            // 重置检索条件
+            reset: function(){
+                if (this.$refs['form'] != undefined) {
+                    this.form = {
+                        authCodeScc:'',
+                        dataType:'',
+                        authFlag:'',
+                        createDateFrom:'',
+                        createDateTo:''
+                    };
+                    this.$refs['form'].resetFields();
+                }
+            },
+
+            //输入信用统一代码回填数据
+            updateCopInfo: function (){
+                request.post('applyController/getCopInfoByCopCode', {'authCodeScc':this.applyForm.authCodeScc}).then((r) => {
+                    if (r.data.success) {
+                        this.applyForm.authCopName = r.data.data.copName;
+                        this.applyForm.authUserId = r.data.data.id;
+                    }else{
+                        apply.$message.error(r.data.message);
+                        this.applyForm.authCodeScc = '';
+                        this.applyForm.authCopName = '';
+                    }
+                });
+            },
+
+            // 新增按钮
+            add: function (row) {
+                this.title = '授权申请';
+                this.operationType = 'add';
+                this.submitBtnVisible = true;
+                this.cancelBtnVisible = true;
+                this.applyVisible = true;
+            },
+            //编辑按钮
+            update: function (row) {
+                this.title = '授权申请';
+                this.operationType = 'update';
+                this.applyForm.id = row.id;
+                this.applyForm.authUserId = row.authUserId;
+                this.applyForm.authCodeScc = row.authCodeScc;
+                this.applyForm.authCopName = row.authCopName;
+                this.applyForm.dataType = row.dataType;
+                this.applyForm.publicIp = row.publicIp;
+                this.applyForm.startTime = row.startTime;
+                this.applyForm.remark = row.remark;
+                //根据记录表主键查询关联条件表并拼接显示
+                request.post('applyController/listCondByRecordId', {'authRecordId':this.applyForm.id}).then((r) => {
+                    if (r.data.success) {
+                        this.applyForm.customMaster = r.data.data.customMaster;
+                        this.applyForm.iEPort = r.data.data.iEPort;
+                        this.applyForm.orgCode = r.data.data.orgCode;
+                        this.applyForm.inspOrgCode = r.data.data.inspOrgCode;
+                    }else{
+                        apply.$message.error(r.data.message);
+                        this.applyForm.authCodeScc = '';
+                        this.applyForm.authCopName = '';
+                    }
+                });
+                this.submitBtnVisible = true;
+                this.cancelBtnVisible = true;
+                this.applyVisible = true;
+            },
+            //查看按钮
+            view: function (row) {
+                this.title = '授权申请';
+                this.operationType = 'view';
+                this.applyForm.id = row.id;
+                this.applyForm.authUserId = row.authUserId;
+                this.applyForm.authCodeScc = row.authCodeScc;
+                this.applyForm.authCopName = row.authCopName;
+                this.applyForm.dataType = row.dataType;
+                this.applyForm.publicIp = row.publicIp;
+                this.applyForm.startTime = row.startTime;
+                this.applyForm.remark = row.remark;
+                //根据记录表主键查询关联条件表并拼接显示
+                request.post('applyController/listCondByRecordId', {'authRecordId':this.applyForm.id}).then((r) => {
+                    if (r.data.success) {
+                        this.applyForm.customMaster = r.data.data.customMaster;
+                        this.applyForm.iEPort = r.data.data.iEPort;
+                        this.applyForm.orgCode = r.data.data.orgCode;
+                        this.applyForm.inspOrgCode = r.data.data.inspOrgCode;
+                    }else{
+                        apply.$message.error(r.data.message);
+                        this.applyForm.authCodeScc = '';
+                        this.applyForm.authCopName = '';
+                    }
+                });
+                this.submitBtnVisible = false;
+                this.cancelBtnVisible = false;
+                this.applyVisible = true;
+            },
+
+
+            // 表单提交
+            submitForm: function () {
+                this.$refs["applyForm"].validate((valid) => {
+                    if (valid) {
+                        //新增
+                        if (this.operationType == 'add') {
+                            request.post('applyController/save', this.applyForm).then((r) => {
+                                if (r.data.success) {
+
+                                    this.$message({
+                                        message: '新增成功',
+                                        type: 'success'
+                                    });
+                                    this.resetForm();
+                                    this.init();
+                                    this.applyVisible = false;
+
+                                } else {
+                                    apply.$message.error(r.data.message);
+                                }
+                            });
+                            //编辑
+                        } else if (this.operationType == 'update') {
+                            request.post('applyController/update', this.applyForm).then((r) => {
+                                if (r.data.success) {
+
+                                    this.$message({
+                                        message: '修改成功',
+                                        type: 'success'
+                                    });
+                                    this.resetForm();
+                                    this.init();
+                                    this.applyVisible = false;
+
+                                } else {
+                                    apply.$message.error(r.data.message);
+                                }
+                            });
+
+                        }
+                    }
+                })
+            },
+
+            //重置表单
+            resetForm: function(){
+                this.applyForm = {
+                    id:'',
+                    authUserId:'',
+                    authCodeScc:'',
+                    dataType:'',
+                    authCopName:'',
+                    remark:'',
+                    customMaster:'',
+                    iEPort:'',
+                    orgCode:'',
+                    inspOrgCode:'',
+                    publicIp:'',
+                    startTime:'',
+                };
+                this.$refs["applyForm"].resetFields();
+            },
+
+            // 取消
+            cancel: function () {
+                this.applyForm = {
+                    id:'',
+                    authUserId:'',
+                    authCodeScc:'',
+                    dataType:'',
+                    authCopName:'',
+                    remark:'',
+                    customMaster:'',
+                    iEPort:'',
+                    orgCode:'',
+                    inspOrgCode:'',
+                    publicIp:'',
+                    startTime:'',
+                };
+                this.applyVisible = false;
+            },
+
+            //数据类型切换事件
+            selectChanged: function (value) {
+                    this.applyForm.customMaster = '';
+                    this.applyForm.iEPort = '';
+                    this.applyForm.orgCode = '';
+                    this.applyForm.inspOrgCode = '';
+            }
+
+        }
+    })
+
+
+</script>
+
+
+
+
+</script>
+<style>
+
+    .el-divider--horizontal {
+        margin: 15px 0;
+    }
+
+    .el-input.is-disabled .el-input__inner {
+        color: #606266;
+    }
+
+    .el-scrollbar__wrap{
+        overflow-x: hidden;
+    }
+
+    .el-select-dropdown .el-scrollbar .el-scrollbar__wrap {
+        overflow: scroll !important;
+    }
+
+    .el-table th.gutter {
+        display: table-cell !important;
+    }
+
+    .el-table colgroup.gutter {
+        display: table-cell !important;
+    }
+
+    .el-upload{
+        width: 100%;
+    }
+    .el-upload .el-upload-dragger{
+        width: 100%;
+    }
+
+</style>
+</html>

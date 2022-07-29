@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>授权记录</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.6/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="auth" style="text-align: center;margin: 0 10px 0 10px">
+    <el-divider content-position="left">检索条件</el-divider>
+    <el-form ref="form" :model="form" label-width="180px">
+        <el-row type="flex" justify="center">
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="申请企业统一社会信用代码" prop="applyCodeScc" style="margin-bottom: 0px;width: 250px">
+                    <el-input size="mini" v-model="form.applyCodeScc" placeholder="请输入内容" style="width: 180px;"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="授权标识" prop="authFlag" style="margin-bottom: 0px;">
+                    <el-select v-model="form.authFlag" placeholder="请选择" size="mini" style="width: 180px;">
+                        <el-option label="申请中" value="0"></el-option>
+                        <el-option label="已授权" value="1"></el-option>
+                        <el-option label="拒绝授权" value="2"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-col>
+            <el-col :span="10" style="text-align: left;">
+                <el-form-item label="创建时间" style="margin-bottom: 0px;">
+                    <el-col :span="12">
+                        <el-date-picker size="mini" type="date" placeholder="选择日期" value-format="yyyy-MM-dd" v-model="form.createDateFrom" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                    <el-col class="line" :span="2">至</el-col>
+                    <el-col :span="10">
+                        <el-date-picker size="mini" placeholder="选择时间" value-format="yyyy-MM-dd" v-model="form.createDateTo" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                </el-form-item>
+            </el-col>
+        </el-row>
+        <el-row type="flex" justify="center">
+            <el-col :span="20" style="text-align: left;">
+                <el-form-item label="数据类型" prop="dataType" style="margin-bottom: 0px;">
+                    <el-select v-model="form.dataType" placeholder="请选择" size="mini" style="width: 180px;">
+                        <el-option label="报关" value="dec"></el-option>
+                        <el-option label="报关回执" value="decRec"></el-option>
+                        <el-option label="报检" value="ciq"></el-option>
+                        <el-option label="报检回执" value="ciqRec"></el-option>
+                        <el-option label="查验" value="check"></el-option>
+                        <el-option label="查验回执" value="checkRec"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-col>
+        </el-row>
+        <el-row type="flex" justify="center">
+            <el-col :span="3" style="text-align: left;margin-top: 6px">
+                <el-button @click="init()" icon="el-icon-search" type="primary" plain size="mini">查询
+                </el-button>
+                <el-button @click="reset()" icon="el-icon-refresh" type="primary" plain size="mini">重置
+                </el-button>
+            </el-col>
+        </el-row>
+    </el-form>
+    <el-divider></el-divider>
+    <el-row>
+        <el-col :span="2">
+<!--                        <el-button @click="add()" icon="el-icon-circle-plus-outline" type="primary" plain size="mini">新增-->
+            </el-button>
+        </el-col>
+    </el-row>
+    <el-row size="mini" style="margin-top: 10px">
+        <el-table
+                :data="authTable"
+                border
+                stripe
+                fit
+                :height="tableHeight"
+                size="mini"
+        >
+            <el-table-column
+                    type="index"
+                    label="序号"
+                    width="50">
+            </el-table-column>
+                        <el-table-column
+                                prop="applyCodeScc"
+                                label="申请企业社会信用代码"
+                                width="160">
+                        </el-table-column>
+                        <el-table-column
+                                prop="applyCopName"
+                                label="申请企业名称"
+                                width="260">
+                        </el-table-column>
+            <el-table-column
+                    prop="authFlag"
+                    label="授权标识"
+                    width="100">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.authFlag=='0'">申请中</span>
+                    <span v-if="scope.row.authFlag=='1'">已授权</span>
+                    <span v-if="scope.row.authFlag=='2'">拒绝授权</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="createTime"
+                    label="创建时间"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="dataType"
+                    label="数据类型"
+                    width="100">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.dataType=='dec'">报关</span>
+                    <span v-if="scope.row.dataType=='decRec'">报关回执</span>
+                    <span v-if="scope.row.dataType=='ciq'">报检</span>
+                    <span v-if="scope.row.dataType=='ciqRec'">报检回执</span>
+                    <span v-if="scope.row.dataType=='check'">查验</span>
+                    <span v-if="scope.row.dataType=='checkRec'">查验回执</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="authTime"
+                    label="授权时间"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    prop="remark"
+                    label="备注"
+            >
+            </el-table-column>
+            <el-table-column
+                    label="操作"
+                    width="200">
+                <template slot-scope="scope">
+                    <el-button @click="successAuth(scope.row)" type="success" plain size="mini" :disabled="scope.row.authFlag==0?false:true">授权
+                    </el-button>
+                    <el-button @click="reAuth(scope.row)" type="danger" plain size="mini" :disabled="scope.row.authFlag==0?false:true">拒绝授权
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-row>
+    <div style="text-align: center;position:fixed; bottom:0;width: 100%">
+        <el-pagination
+                @current-change="handleCurrentChange"
+                :current-page.sync="currPage"
+                background
+                :page-size="pageSizeSelect"
+                layout="total, prev, pager, next"
+                :total.sync="totals">
+        </el-pagination>
+    </div>
+
+</div>
+</body>
+<script type="text/javascript" src="js/vue/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
+<script type="text/javascript" src="js/axios.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript">
+    var auth = new Vue({
+        el: '#auth',
+        data: {
+            form: {
+                applyCodeScc:'',
+                dataType:'',
+                authFlag:'',
+                createDateFrom:'',
+                createDateTo:''
+            },
+            authTable: [],
+            tableHeight: '',
+            currPage: 0,
+            totals: 0,
+            pageSizeSelect: 10,
+            pageNum: 1,
+            authVisible:false,
+            title:'',
+            disabled:false,
+            operationType:'',
+            authForm:{
+
+            },
+            rules: {
+
+            }
+        },
+        created() {
+            this._getTableHeight()
+        },
+        mounted() {
+            let _this = this;
+            window.onresize = () => {
+                if (_this.resizeFlag) {
+                    clearTimeout(_this.resizeFlag)
+                }
+                _this.resizeFlag = setTimeout(() => {
+                    _this._getTableHeight()
+                    _this.resizeFlag = null
+                }, 100)
+            };
+            _this.init();
+        },
+        methods: {
+            init: function () {
+                var params = this.form;
+                params.pageSize = this.pageSizeSelect;
+                params.pageNum = this.pageNum;
+                request.post('authController/list', params).then((r) => {
+                    if (r.data.success) {
+                        console.log(r.data.data);
+                        this.authTable = r.data.data.records;
+                        this.currPage = r.data.data.current;
+                        this.totals = r.data.data.total;
+                    }
+                    this.pageNum=1;
+                });
+            },
+            handleCurrentChange: function (val) {
+                this.pageNum = val;
+                this.form = {
+                    applyCodeScc:'',
+                    dataType:'',
+                    authFlag:'',
+                    createDateFrom:'',
+                    createDateTo:''
+                };
+                this.init();
+            },
+            //计算table高度
+            _getTableHeight() {
+                let tableH = 230;
+                let tableHeightDetil = window.innerHeight - tableH;
+                if (tableHeightDetil <= 300) {
+                    this.tableHeight = 300
+                } else {
+                    this.tableHeight = window.innerHeight - tableH
+                }
+            },
+            // 重置检索条件
+            reset: function(){
+                if (this.$refs['form'] != undefined) {
+                    this.form = {
+                        applyCodeScc:'',
+                        dataType:'',
+                        authFlag:'',
+                        createDateFrom:'',
+                        createDateTo:''
+                    };
+                    this.$refs['form'].resetFields();
+                }
+            },
+
+            //成功授权
+            successAuth: function (row) {
+                this.$confirm('是否要授权该条数据？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    request.post('authController/updateAuthFlag',
+                        {
+                            'id': row.id,
+                            'authFlag': '1'
+                        }
+                    ).then((r) => {
+                        if (r.data.success) {
+
+                            this.$message({
+                                message: '已授权',
+                                type: 'success'
+                            });
+                            this.init();
+                        } else {
+                            auth.$message.error(r.data.message);
+                        }
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消授权操作'
+                    });
+                });
+            },
+
+            //拒绝授权
+            reAuth: function (row) {
+                this.$confirm('是否要拒绝授权该条数据？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    request.post('authController/updateAuthFlag',
+                        {
+                            'id': row.id,
+                            'authFlag': '2'
+                        }
+                    ).then((r) => {
+                        if (r.data.success) {
+
+                            this.$message({
+                                message: '拒绝授权',
+                                type: 'success'
+                            });
+                            this.init();
+                        } else {
+                            auth.$message.error(r.data.message);
+                        }
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消拒绝授权操作'
+                    });
+                });
+            },
+
+            //重置表单
+            resetForm: function(){
+                this.authForm = {
+
+                };
+                this.$refs["authForm"].resetFields();
+            },
+
+            // 取消
+            cancel: function () {
+            }
+
+        }
+    })
+
+
+</script>
+
+
+
+
+</script>
+<style>
+
+    .el-divider--horizontal {
+        margin: 15px 0;
+    }
+
+    .el-input.is-disabled .el-input__inner {
+        color: #606266;
+    }
+
+    .el-scrollbar__wrap{
+        overflow-x: hidden;
+    }
+
+    .el-select-dropdown .el-scrollbar .el-scrollbar__wrap {
+        overflow: scroll !important;
+    }
+
+    .el-table th.gutter {
+        display: table-cell !important;
+    }
+
+    .el-table colgroup.gutter {
+        display: table-cell !important;
+    }
+
+    .el-upload{
+        width: 100%;
+    }
+    .el-upload .el-upload-dragger{
+        width: 100%;
+    }
+
+</style>
+</html>

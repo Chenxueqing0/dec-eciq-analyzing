@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.dec.DxpDecResultMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.dec.DxpDecResult">
+        <id column="ID" property="id" />
+        <result column="CUS_CIQ_NO" property="cusCiqNo" />
+        <result column="ENTRY_ID" property="entryId" />
+        <result column="NOTICE_DATE" property="noticeDate" />
+        <result column="CHANNEL" property="channel" />
+        <result column="NOTE" property="note" />
+        <result column="CUSTOM_MASTER" property="customMaster" />
+        <result column="I_E_DATE" property="iEDate" />
+        <result column="D_DATE" property="dDate" />
+        <result column="FIELD1" property="field1" />
+        <result column="FIELD2" property="field2" />
+        <result column="FIELD3" property="field3" />
+        <result column="REALTIME" property="realtime" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.BdUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.BdUser">
+        <id column="ID" property="id" />
+        <result column="ACCOUNT" property="account" />
+        <result column="PASSWORD" property="password" />
+        <result column="COP_NAME" property="copName" />
+        <result column="COP_CODE_SCC" property="copCodeScc" />
+        <result column="BROKER" property="broker" />
+        <result column="TC_SD_DEC" property="tcSdDec" />
+        <result column="TC_SD_DEC_REC" property="tcSdDecRec" />
+        <result column="TC_SD_CIQ" property="tcSdCiq" />
+        <result column="TC_SD_CIQ_REC" property="tcSdCiqRec" />
+        <result column="TC_SD_CHECK" property="tcSdCheck" />
+        <result column="TC_RX_DEC" property="tcRxDec" />
+        <result column="TC_RX_DEC_REC" property="tcRxDecRec" />
+        <result column="CREATE_TIME" property="createTime" />
+        <result column="CREATE_USER" property="createUser" />
+        <result column="P_LEVEL" property="pLevel" />
+        <result column="TC_SD_CHECK_REC" property="tcSdCheckRec" />
+    </resultMap>
+
+    <update id="updatePasById">
+        update BD_USER t
+        set t.PASSWORD = #{bdUser.password}
+        where t.ID = #{bdUser.id}
+    </update>
+
+</mapper>

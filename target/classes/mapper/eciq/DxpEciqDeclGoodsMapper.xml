@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.eciq.DxpEciqDeclGoodsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.eciq.DxpEciqDeclGoods">
+        <id column="ID" property="id" />
+        <result column="ENT_DECL_NO" property="entDeclNo" />
+        <result column="GOODS_ID" property="goodsId" />
+        <result column="GOODS_NO" property="goodsNo" />
+        <result column="PRICE_PER_UNIT" property="pricePerUnit" />
+        <result column="PROD_HS_CODE" property="prodHsCode" />
+        <result column="HS_CODE_DESC" property="hsCodeDesc" />
+        <result column="QTY" property="qty" />
+        <result column="QTY_MEAS_UNIT" property="qtyMeasUnit" />
+        <result column="WEIGHT" property="weight" />
+        <result column="WT_MEAS_UNIT" property="wtMeasUnit" />
+        <result column="BY1" property="by1" />
+        <result column="BY2" property="by2" />
+        <result column="CIQ_CODE" property="ciqCode" />
+        <result column="CIQ_NAME" property="ciqName" />
+        <result column="CURRENCY_OLD" property="currencyOld" />
+        <result column="CURRENCY_NEW" property="currencyNew" />
+        <result column="DANG_NAME" property="dangName" />
+        <result column="DECL_GOODS_CNAME" property="declGoodsCname" />
+        <result column="DECL_GOODS_ENAME" property="declGoodsEname" />
+        <result column="ENG_MAN_ENT_CNM" property="engManEntCnm" />
+        <result column="GOODS_ATTR" property="goodsAttr" />
+        <result column="GOODS_BRAND" property="goodsBrand" />
+        <result column="GOODS_MODEL" property="goodsModel" />
+        <result column="GOODS_SPEC" property="goodsSpec" />
+        <result column="GOODS_TOTAL_VAL" property="goodsTotalVal" />
+        <result column="INSP_TYPE" property="inspType" />
+        <result column="MNUFCTR_REG_NAME" property="mnufctrRegName" />
+        <result column="MNUFCTR_REG_NO" property="mnufctrRegNo" />
+        <result column="NO_DANG_FLAG" property="noDangFlag" />
+        <result column="ORI_CTRY_CODE_OLD" property="oriCtryCodeOld" />
+        <result column="ORI_CTRY_CODE_NEW" property="oriCtryCodeNew" />
+        <result column="ORIG_PLACE_CODE_OLD" property="origPlaceCodeOld" />
+        <result column="ORIG_PLACE_CODE_NEW" property="origPlaceCodeNew" />
+        <result column="PACK_SPEC" property="packSpec" />
+        <result column="PACK_TYPE" property="packType" />
+        <result column="PROD_BATCH_NO" property="prodBatchNo" />
+        <result column="PROD_QGP" property="prodQgp" />
+        <result column="PROD_VALID_DT" property="prodValidDt" />
+        <result column="PRODUCE_DATE" property="produceDate" />
+        <result column="PURPOSE" property="purpose" />
+        <result column="STD_QTY" property="stdQty" />
+        <result column="STD_QTY_UNIT_CODE" property="stdQtyUnitCode" />
+        <result column="STD_WEIGHT" property="stdWeight" />
+        <result column="STD_WEIGHT_UNIT_CODE" property="stdWeightUnitCode" />
+        <result column="STUFF" property="stuff" />
+        <result column="UN_CODE" property="unCode" />
+        <result column="REALTIME" property="realtime" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+</mapper>

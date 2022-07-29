@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.eciq.DxpEciqDeclMarkLobMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.eciq.DxpEciqDeclMarkLob">
+        <id column="ID" property="id" />
+        <result column="MARK_ID" property="markId" />
+        <result column="ENT_DECL_NO" property="entDeclNo" />
+        <result column="ATTACH_NAME" property="attachName" />
+        <result column="ATTACH_TYPE" property="attachType" />
+        <result column="ATTACHMENT_PATH" property="attachmentPath" />
+        <result column="REALTIME" property="realtime" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+</mapper>

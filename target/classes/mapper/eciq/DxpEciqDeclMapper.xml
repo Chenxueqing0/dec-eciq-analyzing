@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.eciq.DxpEciqDeclMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.eciq.DxpEciqDecl">
+        <id column="ID" property="id" />
+        <result column="ENT_DECL_NO" property="entDeclNo" />
+        <result column="ENT_UUID" property="entUuid" />
+        <result column="TRADE_MODE_CODE" property="tradeModeCode" />
+        <result column="CONTRACT_NO" property="contractNo" />
+        <result column="MARK_NO" property="markNo" />
+        <result column="TRADE_COUNTRY_CODE_OLD" property="tradeCountryCodeOld" />
+        <result column="TRADE_COUNTRY_CODE_NEW" property="tradeCountryCodeNew" />
+        <result column="DESP_CTRY_CODE_OLD" property="despCtryCodeOld" />
+        <result column="DESP_CTRY_CODE_NEW" property="despCtryCodeNew" />
+        <result column="TRANS_MODE_CODE_OLD" property="transModeCodeOld" />
+        <result column="TRANS_MODE_CODE_NEW" property="transModeCodeNew" />
+        <result column="DESP_PORT_CODE" property="despPortCode" />
+        <result column="PORT_STOP_CODE" property="portStopCode" />
+        <result column="ENTY_PORT_CODE" property="entyPortCode" />
+        <result column="GDS_ARVL_DATE" property="gdsArvlDate" />
+        <result column="GOODS_PLACE" property="goodsPlace" />
+        <result column="DEST_CODE" property="destCode" />
+        <result column="COUNTER_CLAIM" property="counterClaim" />
+        <result column="BILL_LAD_NO" property="billLadNo" />
+        <result column="DELIVERY_ORDER" property="deliveryOrder" />
+        <result column="INSP_ORG_CODE" property="inspOrgCode" />
+        <result column="DECL_CUSTM" property="declCustm" />
+        <result column="SPEC_DECL_FLAG" property="specDeclFlag" />
+        <result column="PURP_ORG_CODE" property="purpOrgCode" />
+        <result column="APP_CERT_CODE" property="appCertCode" />
+        <result column="APPL_ORI" property="applOri" />
+        <result column="APPL_COPY_QUAN" property="applCopyQuan" />
+        <result column="CUSTM_REG_NO" property="custmRegNo" />
+        <result column="DECL_PERSN_CERT_NO" property="declPersnCertNo" />
+        <result column="DECL_PERSON_NAME" property="declPersonName" />
+        <result column="DECL_REG_NAME" property="declRegName" />
+        <result column="CONTACTPERSON" property="contactperson" />
+        <result column="CONT_TEL" property="contTel" />
+        <result column="CONSIGNEE_CODE" property="consigneeCode" />
+        <result column="CONSIGNEE_CNAME" property="consigneeCname" />
+        <result column="CONSIGNEE_ENAME" property="consigneeEname" />
+        <result column="CONSIGNOR_CNAME" property="consignorCname" />
+        <result column="DECL_CODE" property="declCode" />
+        <result column="DECL_DATE" property="declDate" />
+        <result column="SPEC_PASS_FLAG" property="specPassFlag" />
+        <result column="DESP_DATE" property="despDate" />
+        <result column="ATTA_COLLECT_NAME" property="attaCollectName" />
+        <result column="TOTAL_VAL_US" property="totalValUs" />
+        <result column="TOTAL_VAL_CN" property="totalValCn" />
+        <result column="CONT_CANCEL_FLAG" property="contCancelFlag" />
+        <result column="APP_CERT_NAME" property="appCertName" />
+        <result column="DECL_REG_NO" property="declRegNo" />
+        <result column="CONVYNCE_NAME" property="convynceName" />
+        <result column="TRANS_MEAN_NO" property="transMeanNo" />
+        <result column="CMPL_DSCHRG_DT" property="cmplDschrgDt" />
+        <result column="CORRELATION_DECL_NO" property="correlationDeclNo" />
+        <result column="CORRELATION_REASON_FLAG" property="correlationReasonFlag" />
+        <result column="SPECL_INSP_QURA_RE" property="speclInspQuraRe" />
+        <result column="CONSIGNOR_ADDR" property="consignorAddr" />
+        <result column="ARRIV_PORT_CODE_OLD" property="arrivPortCodeOld" />
+        <result column="ARRIV_PORT_CODE_NEW" property="arrivPortCodeNew" />
+        <result column="CONSIGNEE_ADDR" property="consigneeAddr" />
+        <result column="CONSIGNOR_CODE" property="consignorCode" />
+        <result column="SITUATION_CODE" property="situationCode" />
+        <result column="SITUATION_LEVEL" property="situationLevel" />
+        <result column="CONSIGNOR_ENAME" property="consignorEname" />
+        <result column="APL_KIND" property="aplKind" />
+        <result column="SPLIT_BILL_LAD_NO" property="splitBillLadNo" />
+        <result column="ORG_CODE" property="orgCode" />
+        <result column="VSA_ORG_CODE" property="vsaOrgCode" />
+        <result column="ORIG_BOX_FLAG" property="origBoxFlag" />
+        <result column="SOFT_TYPE" property="softType" />
+        <result column="TECH_REG_CODE" property="techRegCode" />
+        <result column="DECL_ID" property="declId" />
+        <result column="SPARE1" property="spare1" />
+        <result column="SPARE2" property="spare2" />
+        <result column="SPARE3" property="spare3" />
+        <result column="SPARE4" property="spare4" />
+        <result column="REALTIME" property="realtime" />
+        <result column="INSP_NO" property="inspNo" />
+        <result column="INSP_NO_E" property="inspNoE" />
+        <result column="CL_BL_NO" property="clBlNo" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+</mapper>

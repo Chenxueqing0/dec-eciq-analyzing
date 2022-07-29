@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.eciq.MqDecEciqDataLocalMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.eciq.MqDecEciqDataLocal">
+        <id column="ID" property="id" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+        <result column="MSG_TYPE" property="msgType" />
+        <result column="MSG_CREATE_TIME" property="msgCreateTime" />
+        <result column="FILE_LOCAL_PATH" property="fileLocalPath" />
+        <result column="DEAL_FLAG" property="dealFlag" />
+        <result column="DEAL_TIME" property="dealTime" />
+        <result column="FIELD1" property="field1" />
+        <result column="FIELD2" property="field2" />
+        <result column="FIELD3" property="field3" />
+        <result column="FIELD4" property="field4" />
+        <result column="FIELD5" property="field5" />
+        <result column="REAL_TIME" property="realTime" />
+    </resultMap>
+
+    <select id="getXmlPath" resultType="com.data.entity.eciq.MqDecEciqDataLocal">
+        select *
+        from (select *
+        from mq_dec_eciq_data_local t
+        where nvl(t.field1, '0') = 0
+          and t.real_time >= to_date('2021-01-01','yyyy-MM-dd'))
+        where rownum &lt;= 14400
+    </select>
+
+</mapper>

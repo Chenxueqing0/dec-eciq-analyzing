@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.dec.DxpDecMsgMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.dec.DxpDecMsg">
+        <id column="ID" property="id" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+        <result column="SENDER_ID" property="senderId" />
+        <result column="RECEIVER_ID" property="receiverId" />
+        <result column="XML_CREAT_TIME" property="xmlCreatTime" />
+        <result column="MSG_TYPE" property="msgType" />
+        <result column="FILE_NAME" property="fileName" />
+        <result column="IC_CARD" property="icCard" />
+        <result column="BIZ_KEY" property="bizKey" />
+        <result column="CREAT_TIME" property="creatTime" />
+    </resultMap>
+
+</mapper>

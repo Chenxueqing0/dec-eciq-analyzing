@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.dec.DxpDecListMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.dec.DxpDecList">
+        <id column="ID" property="id"/>
+        <result column="SEQ_NO" property="seqNo"/>
+        <result column="CLASS_MARK" property="classMark"/>
+        <result column="CODE_TS" property="codeTs"/>
+        <result column="CONTR_ITEM" property="contrItem"/>
+        <result column="DECL_PRICE" property="declPrice"/>
+        <result column="DUTY_MODE" property="dutyMode"/>
+        <result column="FACTOR" property="factor"/>
+        <result column="G_MODEL" property="gModel"/>
+        <result column="G_NAME" property="gName"/>
+        <result column="G_NO" property="gNo"/>
+        <result column="ORIGIN_COUNTRY" property="originCountry"/>
+        <result column="TRADE_CURR" property="tradeCurr"/>
+        <result column="DECL_TOTAL" property="declTotal"/>
+        <result column="G_QTY" property="gQty"/>
+        <result column="FIRST_QTY" property="firstQty"/>
+        <result column="SECOND_QTY" property="secondQty"/>
+        <result column="G_UNIT" property="gUnit"/>
+        <result column="FIRST_UNIT" property="firstUnit"/>
+        <result column="SECOND_UNIT" property="secondUnit"/>
+        <result column="USE_TO" property="useTo"/>
+        <result column="WORK_USD" property="workUsd"/>
+        <result column="EXG_NO" property="exgNo"/>
+        <result column="EXG_VERSION" property="exgVersion"/>
+        <result column="DESTINATION_COUNTRY" property="destinationCountry"/>
+        <result column="FIELD1" property="field1"/>
+        <result column="FIELD2" property="field2"/>
+        <result column="FIELD3" property="field3"/>
+        <result column="FIELD4" property="field4"/>
+        <result column="FIELD5" property="field5"/>
+        <result column="FIELD6" property="field6"/>
+        <result column="FIELD7" property="field7"/>
+        <result column="FIELD8" property="field8"/>
+        <result column="FIELD9" property="field9"/>
+        <result column="FIELD10" property="field10"/>
+        <result column="REALTIME" property="realtime"/>
+        <result column="ORIGIN_COUNTRY_OLD" property="originCountryOld"/>
+        <result column="DESTINATION_COUNTRY_OLD" property="destinationCountryOld"/>
+        <result column="TRADE_CURR_OLD" property="tradeCurrOld"/>
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+    <insert id="batchInsert" parameterType="list">
+        insert into dxp_dec_list(ID, SEQ_NO, CLASS_MARK, CODE_TS, CONTR_ITEM, DECL_PRICE,
+        DUTY_MODE, FACTOR, G_MODEL, G_NAME, G_NO, ORIGIN_COUNTRY,
+        TRADE_CURR, DECL_TOTAL, G_QTY, FIRST_QTY, SECOND_QTY, G_UNIT, FIRST_UNIT,
+        SECOND_UNIT, USE_TO, WORK_USD, EXG_NO, EXG_VERSION, DESTINATION_COUNTRY,
+        FIELD1, FIELD2, FIELD3, FIELD4, FIELD5, FIELD6, FIELD7,
+        FIELD8, FIELD9, FIELD10, ORIGIN_COUNTRY_OLD, DESTINATION_COUNTRY_OLD, TRADE_CURR_OLD,COP_MSG_ID)
+        <foreach collection="list" item="item" index="index" separator="union all">
+            select #{item.id},#{item.seqNo},#{item.classMark},#{item.codeTs},#{item.contrItem},#{item.declPrice},
+            #{item.dutyMode},#{item.factor},#{item.gModel},#{item.gName},#{item.gNo},#{item.originCountry},
+            #{item.tradeCurr},#{item.declTotal},#{item.gQty},#{item.firstQty},#{item.secondQty},#{item.gUnit},#{item.firstUnit},
+            #{item.secondUnit},#{item.useTo},#{item.workUsd},#{item.exgNo},#{item.exgVersion},#{item.destinationCountry},
+            #{item.field1},#{item.field2},#{item.field3},#{item.field4},#{item.field5},#{item.field6},#{item.field7},
+            #{item.field8},#{item.field9},#{item.field10},#{item.originCountryOld},#{item.destinationCountryOld},#{item.tradeCurrOld},#{item.copMsgId}
+            from dual
+        </foreach>
+    </insert>
+
+</mapper>

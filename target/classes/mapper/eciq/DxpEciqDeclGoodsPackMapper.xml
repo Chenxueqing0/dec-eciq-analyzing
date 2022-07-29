@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.eciq.DxpEciqDeclGoodsPackMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.eciq.DxpEciqDeclGoodsPack">
+        <id column="ID" property="id" />
+        <result column="PACK_ID" property="packId" />
+        <result column="ENT_DECL_NO" property="entDeclNo" />
+        <result column="GOODS_ID" property="goodsId" />
+        <result column="GOODS_NO" property="goodsNo" />
+        <result column="PACK_LENTH" property="packLenth" />
+        <result column="PACK_HIGH" property="packHigh" />
+        <result column="PACK_WIDE" property="packWide" />
+        <result column="PACK_TYPE_CODE_OLD" property="packTypeCodeOld" />
+        <result column="PACK_TYPE_CODE_NEW" property="packTypeCodeNew" />
+        <result column="PACK_CATG_NAME" property="packCatgName" />
+        <result column="PACK_TYPE_SHORT" property="packTypeShort" />
+        <result column="PACK_QTY" property="packQty" />
+        <result column="IS_MAIN_PACK" property="isMainPack" />
+        <result column="MAT_TYPE" property="matType" />
+        <result column="PROC_FACTORY" property="procFactory" />
+        <result column="REALTIME" property="realtime" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+</mapper>

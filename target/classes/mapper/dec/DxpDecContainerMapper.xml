@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.dec.DxpDecContainerMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.dec.DxpDecContainer">
+        <id column="ID" property="id"/>
+        <result column="SEQ_NO" property="seqNo"/>
+        <result column="CONTAINER_ID" property="containerId"/>
+        <result column="CONTAINER_MD" property="containerMd"/>
+        <result column="CONTAINER_WT" property="containerWt"/>
+        <result column="FIELD1" property="field1"/>
+        <result column="FIELD2" property="field2"/>
+        <result column="FIELD3" property="field3"/>
+        <result column="FIELD4" property="field4"/>
+        <result column="FIELD5" property="field5"/>
+        <result column="REALTIME" property="realtime"/>
+        <result column="CONTAINER_MD_OLD" property="containerMdOld"/>
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+    <insert id="batchInsert" parameterType="list">
+        insert into dxp_dec_container (ID, SEQ_NO, CONTAINER_ID, CONTAINER_MD, CONTAINER_WT,
+        FIELD1, FIELD2, FIELD3, FIELD4, FIELD5, CONTAINER_MD_OLD,COP_MSG_ID)
+        <foreach collection="list" item="item" index="index" separator="union all">
+            select #{item.id},#{item.seqNo},#{item.containerId},#{item.containerMd},#{item.containerWt},
+            #{item.field1},#{item.field2},#{item.field3},#{item.field4},#{item.field5},#{item.containerMdOld},#{item.copMsgId}
+            from dual
+        </foreach>
+    </insert>
+
+</mapper>

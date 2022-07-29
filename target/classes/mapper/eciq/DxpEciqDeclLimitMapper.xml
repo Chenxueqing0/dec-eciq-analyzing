@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.eciq.DxpEciqDeclLimitMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.eciq.DxpEciqDeclLimit">
+        <id column="ID" property="id" />
+        <result column="ENT_DECL_NO" property="entDeclNo" />
+        <result column="DECL_LIMIT_ID" property="declLimitId" />
+        <result column="ENT_QUALIF_NO" property="entQualifNo" />
+        <result column="ENT_QUALIF_TYPE_CODE" property="entQualifTypeCode" />
+        <result column="ENT_QUALIF_NAME" property="entQualifName" />
+        <result column="OPER_TIME" property="operTime" />
+        <result column="ENT_ORG_CODE" property="entOrgCode" />
+        <result column="FALG_ARCHIVE" property="falgArchive" />
+        <result column="ENT_NAME" property="entName" />
+        <result column="REALTIME" property="realtime" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+</mapper>

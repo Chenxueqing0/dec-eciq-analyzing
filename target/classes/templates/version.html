@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>版本管理</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.6/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="version" style="text-align: center;margin: 0 10px 0 10px">
+    <el-divider content-position="left">检索条件</el-divider>
+    <el-form ref="form" :model="form" label-width="100px">
+        <el-row type="flex" justify="center">
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="版本号" prop="versionId" style="margin-bottom: 0px;">
+                    <el-input size="mini" v-model="form.versionId" placeholder="请输入内容" style="width: 180px;"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :span="10" style="text-align: left;">
+                <el-form-item label="上传时间" style="margin-bottom: 0px;">
+                    <el-col :span="12">
+                        <el-date-picker size="mini" type="date" placeholder="选择日期" value-format="yyyy-MM-dd" v-model="form.createDateFrom" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                    <el-col class="line" :span="2">至</el-col>
+                    <el-col :span="10">
+                        <el-date-picker size="mini" placeholder="选择时间" value-format="yyyy-MM-dd" v-model="form.createDateTo" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                </el-form-item>
+            </el-col>
+        </el-row>
+        <el-row type="flex" justify="center">
+            <el-col :span="3" style="text-align: left;margin-top: 6px">
+                <el-button @click="init()" icon="el-icon-search" type="primary" plain size="mini">查询
+                </el-button>
+                <el-button @click="reset()" icon="el-icon-refresh" type="primary" plain size="mini">重置
+                </el-button>
+            </el-col>
+        </el-row>
+    </el-form>
+    <el-divider></el-divider>
+    <el-row>
+        <el-col :span="2">
+            <el-button @click="add()" icon="el-icon-circle-plus-outline" type="primary" plain size="mini">新增
+            </el-button>
+        </el-col>
+    </el-row>
+    <el-row size="mini" style="margin-top: 10px">
+        <el-table
+                :data="versionTable"
+                border
+                stripe
+                fit
+                :height="tableHeight"
+                size="mini"
+                >
+            <el-table-column
+                    type="index"
+                    label="序号"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="versionId"
+                    label="版本号"
+                    width="170">
+            </el-table-column>
+            <el-table-column
+                    prop="versionPath"
+                    label="文件路径"
+                    width="400">
+            </el-table-column>
+            <el-table-column
+                    prop="remark"
+                    label="备注">
+            </el-table-column>
+            <el-table-column
+                    prop="createTime"
+                    label="创建时间"
+                    width="160">
+            </el-table-column>
+            <el-table-column
+                    label="操作"
+                    width="280">
+                <template slot-scope="scope">
+                    <el-button @click="update(scope.row)" type="primary" plain size="mini">编辑
+                    </el-button>
+                    <el-button @click="downLoadFile(scope.row)" type="primary" plain size="mini">下载文件
+                    </el-button>
+                    <el-button @click="deleteInfo(scope.row)" type="danger" plain size="mini">删除
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-row>
+    <div style="text-align: center;position:fixed; bottom:0;width: 100%">
+        <el-pagination
+                @current-change="handleCurrentChange"
+                :current-page.sync="currPage"
+                background
+                :page-size="10"
+                layout="total, prev, pager, next"
+                :total.sync="totals">
+        </el-pagination>
+    </div>
+    <el-dialog :title="title" v-if="versionVisible" :visible.sync="versionVisible" width="40%" top="6vh" :before-close="cancel">
+        <el-form ref="whForm" :model="whForm" :rules="rules" label-width="80px" style="width: 90%">
+            <el-form-item label="版本号" prop="versionId">
+                <el-input v-model="whForm.versionId" :disabled="disabled"></el-input>
+            </el-form-item>
+            <el-form-item label="备注" prop="remark">
+                <el-input v-model="whForm.remark" type="textarea" :rows="2"></el-input>
+            </el-form-item>
+            <el-form-item label="上传文件" prop="fileList">
+                <el-upload
+                        class="upload-demo"
+                        drag
+                        action="versionController/upload"
+                        ref="upload"
+                        :file-list="whForm.fileList"
+                        :on-remove="handleRemove"
+                        :on-success="handleSuccess"
+                        :on-exceed="handleExceed"
+                        :before-remove="beforeRemove"
+                        :limit="1"
+                        multiple>
+                    <i class="el-icon-upload"></i>
+                    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                </el-upload>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="submitForm()">确定</el-button>
+                <el-button @click="cancel()">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+</div>
+</body>
+<script type="text/javascript" src="js/vue/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
+<script type="text/javascript" src="js/axios.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript">
+    var version = new Vue({
+        el: '#version',
+        data: {
+            form: {
+                id:'',//传id即查详情
+                versionId:'',
+                createDateFrom:'',
+                createDateTo:''
+            },
+            versionTable: [],
+            tableHeight: '',
+            currPage: 0,
+            totals: 0,
+            pageSize: 10,
+            pageNum: 1,
+            versionVisible:false,
+            title:'',
+            disabled:false,
+            operationType:'',
+            whForm:{
+                versionId:'',
+                fileList: [],
+                remark:''
+            },
+            rules: {
+                versionId: [
+                    { required: true, message: "请输入版本号", trigger: "blur" },
+                ]
+            }
+        },
+        created() {
+            this._getTableHeight()
+        },
+        mounted() {
+            let _this = this;
+            window.onresize = () => {
+                if (_this.resizeFlag) {
+                    clearTimeout(_this.resizeFlag)
+                }
+                _this.resizeFlag = setTimeout(() => {
+                    _this._getTableHeight()
+                    _this.resizeFlag = null
+                }, 100)
+            };
+            _this.init();
+        },
+        methods: {
+            init: function () {
+                var params = this.form;
+                params.pageSize = this.pageSize;
+                params.pageNum = this.pageNum;
+                request.post('versionController/list', params).then((r) => {
+                    if (r.data.success) {
+                        this.versionTable = r.data.data.list;
+                        this.currPage = r.data.data.pageNum;
+                        this.totals = r.data.data.total;
+                    }
+                    this.pageNum=1;
+                });
+            },
+            handleCurrentChange: function (val) {
+                this.pageNum = val;
+                this.init();
+            },
+            //计算table高度
+            _getTableHeight() {
+                let tableH = 220;
+                let tableHeightDetil = window.innerHeight - tableH;
+                if (tableHeightDetil <= 300) {
+                    this.tableHeight = 300
+                } else {
+                    this.tableHeight = window.innerHeight - tableH
+                }
+            },
+            // 重置检索条件
+            reset: function(){
+                if (this.$refs['form'] != undefined) {
+                    this.form = {
+                        id:'',
+                        versionId:'',
+                        createDateFrom:'',
+                        createDateTo:''
+                    };
+                    this.$refs['form'].resetFields();
+                }
+            },
+
+            // 新增按钮
+            add: function (row) {
+                this.title = '新增版本文件';
+                this.operationType = 'add';
+                this.disabled = false;
+                this.versionVisible = true;
+            },
+            //编辑按钮
+            update: function (row) {
+                this.title = '编辑版本文件';
+                this.operationType = 'update';
+                this.disabled = true;
+                this.whForm.versionId = row.versionId;
+                this.whForm.remark = row.remark;
+                this.versionVisible = true;
+            },
+            //删除按钮
+            deleteInfo: function (row) {
+                this.$confirm('是否要删除这条数据？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    request.post('versionController/delete',[row.id]).then((r) => {
+                        if(r.data.success){
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功'
+                            });
+                            this.init();
+                        } else {
+                            this.$message.error('删除失败');
+                        }
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            //下载文件
+            downLoadFile:function (row){
+                window.open('versionController/downLoadFile?versionId='+row.versionId)
+            },
+
+            // 表单提交
+            submitForm: function () {
+                this.$refs["whForm"].validate((valid) => {
+                    if (valid) {
+                        if (this.whForm.fileList.length == 0) {
+                            this.$message({
+                                message: '文件为空，请上传文件',
+                                type: 'warning'
+                            });
+                        } else {
+                            var params2 = {
+                                versionId:this.whForm.versionId,
+                                remark:this.whForm.remark,
+                                fileName:this.whForm.fileList[0].name,
+                                filePath:this.whForm.fileList[0].url
+                            };
+                            //新增
+                            if (this.operationType == 'add') {
+                                request.post('versionController/save', params2).then((r) => {
+                                    if (r.data.success) {
+
+                                        this.$message({
+                                            message: '新增成功',
+                                            type: 'success'
+                                        });
+                                        this.resetForm();
+                                        this.init();
+                                        this.versionVisible = false;
+
+                                    } else {
+                                        version.$message.error(r.data.message);
+                                    }
+                                });
+                                //编辑
+                            } else if (this.operationType == 'update') {
+                                request.post('versionController/update', params2).then((r) => {
+                                    if (r.data.success) {
+
+                                        this.$message({
+                                            message: '修改成功',
+                                            type: 'success'
+                                        });
+                                        this.resetForm();
+                                        this.init();
+                                        this.versionVisible = false;
+
+                                    } else {
+                                        version.$message.error(r.data.message);
+                                    }
+                                });
+                            }
+
+
+
+
+                        }
+                    }
+                })
+            },
+
+            //重置表单
+            resetForm: function(){
+                this.whForm = {
+                    versionId:'',
+                    fileList: [],
+                    remark:''
+                };
+                this.$refs["whForm"].resetFields();
+            },
+
+            // 取消
+            cancel: function () {
+                this.whForm.versionId='';
+                this.whForm.fileList=[];
+                this.whForm.remark='';
+                this.versionVisible = false;
+            },
+
+
+            // 上传前处理
+            beforeUpload(file) {
+                let fileSize = file.size
+                const FIVE_M= 5*1024*1024;
+                //大于5M，不允许上传
+                if(fileSize>FIVE_M){
+                    this.$message.error("最大上传5M")
+                    return  false
+                }
+                return true
+            },
+            // 文件数量过多时提醒
+            handleExceed() {
+                this.$message({ type: 'error', message: '最多支持1个文件上传' })
+            },
+            handleRemove(file) {
+                this.whForm.fileList.splice(this.whForm.fileList.indexOf(file),1);
+            },
+            beforeRemove(file, fileList) {
+                if (file && file.status === "success") {
+                    return this.$confirm(`确定移除 ${file.name}？`);
+                }
+            },
+            handleSuccess(file) {
+                this.whForm.fileList.push({name:file.data.fileName, url:file.data.filePath});
+            }
+
+
+
+        }
+    })
+
+
+</script>
+
+
+
+
+</script>
+<style>
+
+    .el-divider--horizontal {
+        margin: 15px 0;
+    }
+
+    .el-input.is-disabled .el-input__inner {
+        color: #606266;
+    }
+
+    .el-scrollbar__wrap{
+        overflow-x: hidden;
+    }
+
+    .el-select-dropdown .el-scrollbar .el-scrollbar__wrap {
+        overflow: scroll !important;
+    }
+
+    .el-table th.gutter {
+        display: table-cell !important;
+    }
+
+    .el-table colgroup.gutter {
+        display: table-cell !important;
+    }
+
+    .el-upload{
+        width: 100%;
+    }
+    .el-upload .el-upload-dragger{
+        width: 100%;
+    }
+
+</style>
+</html>

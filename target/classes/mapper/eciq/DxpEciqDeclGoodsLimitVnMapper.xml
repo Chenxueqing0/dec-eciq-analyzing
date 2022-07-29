@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.eciq.DxpEciqDeclGoodsLimitVnMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.eciq.DxpEciqDeclGoodsLimitVn">
+        <id column="ID" property="id" />
+        <result column="LIMIT_VIN_ID" property="limitVinId" />
+        <result column="ENT_DECL_NO" property="entDeclNo" />
+        <result column="LIMIT_ID" property="limitId" />
+        <result column="LIC_TYPE_CODE" property="licTypeCode" />
+        <result column="LICENCE_NO" property="licenceNo" />
+        <result column="GOODS_ID" property="goodsId" />
+        <result column="GOODS_NO" property="goodsNo" />
+        <result column="VIN_NO" property="vinNo" />
+        <result column="BILL_LAD_DATE" property="billLadDate" />
+        <result column="QUALITY_QGP" property="qualityQgp" />
+        <result column="MOTOR_NO" property="motorNo" />
+        <result column="VIN_CODE" property="vinCode" />
+        <result column="CHASSIS_NO" property="chassisNo" />
+        <result column="INVOICE_NUM" property="invoiceNum" />
+        <result column="PRICE_PER_UNIT" property="pricePerUnit" />
+        <result column="PROD_CNNM" property="prodCnnm" />
+        <result column="PROD_ENNM" property="prodEnnm" />
+        <result column="MODEL_EN" property="modelEn" />
+        <result column="REALTIME" property="realtime" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+</mapper>

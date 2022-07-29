@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.dec.DxpDecEcoRealationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.dec.DxpDecEcoRelation">
+        <id column="ID" property="id" />
+        <result column="SEQ_NO" property="seqNo" />
+        <result column="CERT_TYPE" property="certType" />
+        <result column="ECO_CERT_NO" property="ecoCertNo" />
+        <result column="DEC_G_NO" property="decGNo" />
+        <result column="ECO_G_NO" property="ecoGNo" />
+        <result column="EXTEND_FILED" property="extendFiled" />
+        <result column="FIELD1" property="field1" />
+        <result column="FIELD2" property="field2" />
+        <result column="FIELD3" property="field3" />
+        <result column="REALTIME" property="realtime" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+    <insert id="batchInsert" parameterType="list">
+        insert into dxp_dec_eco_relation (ID, SEQ_NO, CERT_TYPE, ECO_CERT_NO, DEC_G_NO,
+        ECO_G_NO, EXTEND_FILED, FIELD1, FIELD2, FIELD3,COP_MSG_ID)
+        <foreach collection="list" item="item" index="index" separator="union all">
+            select #{item.id},#{item.seqNo},#{item.certType},#{item.ecoCertNo},#{item.decGNo},
+            #{item.ecoGNo},#{item.extendFiled},#{item.field1},#{item.field2},#{item.field3},#{item.copMsgId}
+            from dual
+        </foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.dec.DxpDecEdocRealationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.dec.DxpDecEdocRelation">
+        <id column="ID" property="id" />
+        <result column="SEQ_NO" property="seqNo" />
+        <result column="EDOC_ID" property="edocId" />
+        <result column="EDOC_CODE" property="edocCode" />
+        <result column="EDOC_FOMAT_TYPE" property="edocFomatType" />
+        <result column="OP_NOTE" property="opNote" />
+        <result column="EDOC_COP_ID" property="edocCopId" />
+        <result column="EDOC_OWNER_CODE" property="edocOwnerCode" />
+        <result column="SIGN_UNIT" property="signUnit" />
+        <result column="SIGN_TIME" property="signTime" />
+        <result column="EDOC_OWNER_NAME" property="edocOwnerName" />
+        <result column="EDOC_SIZE" property="edocSize" />
+        <result column="FIELD1" property="field1" />
+        <result column="FIELD2" property="field2" />
+        <result column="FIELD3" property="field3" />
+        <result column="REALTIME" property="realtime" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+    <insert id="batchInsert" parameterType="list">
+        insert into dxp_dec_edoc_relation (ID, SEQ_NO, EDOC_ID, EDOC_CODE, EDOC_FOMAT_TYPE,
+        OP_NOTE, EDOC_COP_ID, EDOC_OWNER_CODE, SIGN_UNIT, SIGN_TIME,
+        EDOC_OWNER_NAME, EDOC_SIZE, FIELD1, FIELD2, FIELD3,COP_MSG_ID)
+        <foreach collection="list" item="item" index="index" separator="union all">
+            select #{item.id},#{item.seqNo},#{item.edocId},#{item.edocCode},#{item.edocFomatType},
+            #{item.opNote},#{item.edocCopId},#{item.edocOwnerCode},#{item.signUnit},#{item.signTime},
+            #{item.edocOwnerName},#{item.edocSize},#{item.field1},#{item.field2},#{item.field3},#{item.copMsgId}
+            from dual
+        </foreach>
+    </insert>
+</mapper>

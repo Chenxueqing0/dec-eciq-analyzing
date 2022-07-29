@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.data.mapper.dec.DxpDecTrnHeadMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.data.entity.dec.DxpDecTrnHead">
+        <id column="ID" property="id" />
+        <result column="TRN_PRE_ID" property="trnPreId" />
+        <result column="TRANS_NO" property="transNo" />
+        <result column="TURN_NO" property="turnNo" />
+        <result column="NATIVE_TRAF_MODE" property="nativeTrafMode" />
+        <result column="TRAF_CUSTOMS_NO" property="trafCustomsNo" />
+        <result column="NATIVE_SHIP_NAME" property="nativeShipName" />
+        <result column="NATIVE_VOYAGE_NO" property="nativeVoyageNo" />
+        <result column="CONTRACTOR_NAME" property="contractorName" />
+        <result column="CONTRACTOR_CODE" property="contractorCode" />
+        <result column="TRANS_FLAG" property="transFlag" />
+        <result column="VALID_TIME" property="validTime" />
+        <result column="E_SEAL_FLAG" property="eSealFlag" />
+        <result column="NOTES" property="notes" />
+        <result column="TRN_TYPE" property="trnType" />
+        <result column="APPL_CODE_SCC" property="applCodeScc" />
+        <result column="FIELD1" property="field1" />
+        <result column="FIELD2" property="field2" />
+        <result column="FIELD3" property="field3" />
+        <result column="FIELD4" property="field4" />
+        <result column="FIELD5" property="field5" />
+        <result column="FIELD6" property="field6" />
+        <result column="FIELD7" property="field7" />
+        <result column="FIELD8" property="field8" />
+        <result column="FIELD9" property="field9" />
+        <result column="FIELD10" property="field10" />
+        <result column="REALTIME" property="realtime" />
+        <result column="SEQ_NO" property="seqNo" />
+        <result column="COP_MSG_ID" property="copMsgId" />
+    </resultMap>
+
+</mapper>

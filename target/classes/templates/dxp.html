@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>版本管理</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.6/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="dxp" style="text-align: center;margin: 0 10px 0 10px">
+    <el-divider content-position="left">检索条件</el-divider>
+    <el-form ref="form" :model="form" label-width="140px">
+        <el-row type="flex" justify="center">
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="报关单统一编号" prop="seqNo" style="margin-bottom: 0px; width: 50px">
+                    <el-input size="mini" v-model="form.seqNo" placeholder="请输入内容" style=" width: 180px;"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :span="5" style="text-align: left;">
+                <el-form-item label="合同号" prop="contrNo" style="margin-bottom: 0px;">
+                    <el-input size="mini" v-model="form.contrNo" placeholder="请输入内容" style="width: 180px;"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :span="10" style="text-align: left;">
+                <el-form-item label="上传时间" style="margin-bottom: 0px;">
+                    <el-col :span="12">
+                        <el-date-picker size="mini" type="date" placeholder="选择日期" value-format="yyyy-MM-dd" v-model="form.createDateFrom" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                    <el-col class="line" :span="2">至</el-col>
+                    <el-col :span="10">
+                        <el-date-picker size="mini" placeholder="选择时间" value-format="yyyy-MM-dd" v-model="form.createDateTo" style="width: 180px;"></el-date-picker>
+                    </el-col>
+                </el-form-item>
+            </el-col>
+        </el-row>
+        <el-row type="flex" justify="center">
+            <el-col :span="20" style="text-align: left;">
+                <el-form-item label="申报单位名称" prop="agentName" style="margin-bottom: 0px;">
+                    <el-input size="mini" v-model="form.agentName" placeholder="请输入内容" style="width: 180px;"></el-input>
+                </el-form-item>
+            </el-col>
+        </el-row>
+        <!--详情-->
+        <el-dialog title="详情" v-if="dxpVisible" :visible.sync="dxpVisible" width="90%" top="6vh" :before-close="cancel">
+            <template>
+                <el-tabs v-model="activeName" @tab-click="handleClick">
+                    <el-tab-pane label="报关单信息" name="dxp">
+                        <div class="div_bos">
+                            <div class="div1">
+                                <el-divider content-position="left">报关单信息</el-divider>
+                                <el-form ref="dxpHeaderData" :model="dxpHeaderData" label-width="135px" size="mini" label-position="right" style="font-size: 10px">
+                                    <el-row>
+                                        <el-col :span="9">
+                                            <el-form-item label="报关单统一编号">
+                                                <el-input v-model="dxpHeaderData.seqNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <!--单据类型：属地报关SD；-->
+                                            <el-form-item label="单据类型">
+                                                <el-input v-model="dxpHeaderData.type"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <el-form-item label="进出口标志">
+                                                <el-input v-model="dxpHeaderData.ieflag"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="申报单位代码">
+                                                <el-input v-model="dxpHeaderData.agentCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="10">
+                                            <el-form-item label="申报单位名称">
+                                                <el-input v-model="dxpHeaderData.agentName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="外汇核销单号">
+                                                <el-input v-model="dxpHeaderData.apprNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-row>
+                                            <el-col :span="11">
+                                                <el-form-item label="提单号">
+                                                    <el-input v-model="dxpHeaderData.billNo"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="6">
+                                                <el-form-item label="主管海关">
+                                                    <el-input v-model="dxpHeaderData.customMaster"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="6">
+                                                <el-form-item label="征免性质">
+                                                    <el-input v-model="dxpHeaderData.cutMode"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="装货港">
+                                                <el-input v-model="dxpHeaderData.distinatePort"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="11">
+                                            <el-form-item label="合同号">
+                                                <el-input v-model="dxpHeaderData.contrNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="境内目的地">
+                                                <el-input v-model="dxpHeaderData.districtCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="8">
+                                            <el-form-item label="运费币制">
+                                                <el-input v-model="dxpHeaderData.feeCurr"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <el-form-item label="运费标记">
+                                                <el-input v-model="dxpHeaderData.feeMark"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <el-form-item label="运费/率">
+                                                <el-input v-model="dxpHeaderData.feeRate"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="7">
+                                            <el-form-item label="毛重">
+                                                <el-input v-model="dxpHeaderData.grossWet"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="9">
+                                            <el-form-item label="进出日期">
+                                                <el-input v-model="dxpHeaderData.iedate"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <el-form-item label="进出口岸">
+                                                <el-input v-model="dxpHeaderData.ieport"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="内销比率">
+                                                <el-input v-model="dxpHeaderData.inRatio"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="保险费币制">
+                                                <el-input v-model="dxpHeaderData.insurCurr"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="5">
+                                            <el-form-item label="保险费标记">
+                                                <el-input v-model="dxpHeaderData.insurMark"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="保险费/率">
+                                                <el-input v-model="dxpHeaderData.insurRate"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="10">
+                                            <el-form-item label="许可证编号">
+                                                <el-input v-model="dxpHeaderData.licenseNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <el-form-item label="备案号">
+                                                <el-input v-model="dxpHeaderData.manualNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="净重">
+                                                <el-input v-model="dxpHeaderData.netWt"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="14">
+                                            <el-form-item label="备注">
+                                                <el-input v-model="dxpHeaderData.noteS"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <el-form-item label="杂费币制">
+                                                <el-input v-model="dxpHeaderData.otherCurr"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="杂费标志">
+                                                <el-input v-model="dxpHeaderData.otherMark"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="杂费/率">
+                                                <el-input v-model="dxpHeaderData.otherRate"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="9">
+                                            <el-form-item label="货主单位代码">
+                                                <el-input v-model="dxpHeaderData.ownerCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="12">
+                                            <!--货主单位名称,消费使用单位/生产销售单位-->
+                                            <el-form-item label="货主单位名称">
+                                                <el-input v-model="dxpHeaderData.ownerName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="5">
+                                            <el-form-item label="件数">
+                                                <el-input v-model="dxpHeaderData.packNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="5">
+                                            <el-form-item label="征税比例">
+                                                <el-input v-model="dxpHeaderData.payWay"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="纳税单位">
+                                                <el-input v-model="dxpHeaderData.paymentMark"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="经营单位编号">
+                                                <el-input v-model="dxpHeaderData.tradeCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="启运国">
+                                                <el-input v-model="dxpHeaderData.tradeCountry"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="5">
+                                            <el-form-item label="贸易方式">
+                                                <el-input v-model="dxpHeaderData.tradeMode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="5">
+                                            <el-form-item label="成交方式">
+                                                <el-input v-model="dxpHeaderData.transMode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="12">
+                                            <!--经营单位名称,收发货人-->
+                                            <el-form-item label="经营单位名称">
+                                                <el-input v-model="dxpHeaderData.tradeName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="运输方式代码">
+                                                <el-input v-model="dxpHeaderData.trafMode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="5">
+                                            <el-form-item label="包装种类">
+                                                <el-input v-model="dxpHeaderData.wrapType"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <el-form-item label="运输工具名称">
+                                                <el-input v-model="dxpHeaderData.trafName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="10">
+                                            <el-form-item label="海关编号">
+                                                <el-input v-model="dxpHeaderData.entryId"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="9">
+                                            <el-form-item label="预录入编号">
+                                                <el-input v-model="dxpHeaderData.preEntryId"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="12">
+                                            <!--录入单位名称;首次进行暂存操作的企业-->
+                                            <el-form-item label="录入单位名称">
+                                                <el-input v-model="dxpHeaderData.copName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <!--录入单位代码;首次进行暂存操作的IC卡企业组织机构编码-->
+                                            <el-form-item label="录入单位代码">
+                                                <el-input v-model="dxpHeaderData.copCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="报关单类型">
+                                                <el-input v-model="dxpHeaderData.entryType"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="10">
+                                            <!--首次进行暂存操作的系统时间-->
+                                            <el-form-item label="首次暂存系统时间">
+                                                <el-input v-model="dxpHeaderData.inputDate"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="7">
+                                            <el-form-item label="录入员IC卡号">
+                                                <el-input v-model="dxpHeaderData.typistNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <el-form-item label="录入员姓名">
+                                                <el-input v-model="dxpHeaderData.inputerName"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <!--报关/转关关系标志。0：一般报关；1：转关运输提前报关-->
+                                            <el-form-item label="报关/转关关系标志">
+                                                <el-input v-model="dxpHeaderData.declTrnRel"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <!--担保验放:1:是；0否-->
+                                            <el-form-item label="担保验放">
+                                                <el-input v-model="dxpHeaderData.chkSurety"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <!-- 自贸区特有的类型：1：普通备案清单2：先进区后报关3：分送集报备案清单4；分送集报报关单-->
+                                            <el-form-item label="自贸区特有的类型">
+                                                <el-input v-model="dxpHeaderData.billType"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="10">
+                                            <el-form-item label="申报单位统一代码">
+                                                <el-input v-model="dxpHeaderData.agentCodeScc"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="10">
+                                            <el-form-item label="货主单位统一代码">
+                                                <el-input v-model="dxpHeaderData.ownerCodeScc"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="10">
+                                            <el-form-item label="经营单位统一代码">
+                                                <el-input v-model="dxpHeaderData.tradeCodeScc"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <!--1-勾选 0-未选1、特殊关系确认2、价格影响确认3、支付特许权使用费确认-->
+                                            <el-form-item label="承诺事项">
+                                                <el-input v-model="dxpHeaderData.promiseItmes"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="贸易国别">
+                                                <el-input v-model="dxpHeaderData.tradeAreaCode"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <!--查验分流:1:表示是查验分流；0:表示不是查验分流-->
+                                            <el-form-item label="查验分流">
+                                                <el-input v-model="dxpHeaderData.checkFlow"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="5">
+                                            <el-form-item label="航次号">
+                                                <el-input v-model="dxpHeaderData.voyNo"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="9">
+                                            <el-form-item label="入库时间">
+                                                <el-input v-model="dxpHeaderData.realtime"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <el-form-item label="结关日期">
+                                                <el-input v-model="dxpHeaderData.clearanceDate"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <el-form-item label="放行日期">
+                                                <el-input v-model="dxpHeaderData.releaseDate"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="6">
+                                            <el-form-item label="更新放行结关日期">
+                                                <el-input v-model="dxpHeaderData.updateTime"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="查验日期">
+                                                <el-input v-model="dxpHeaderData.checkDate"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="6">
+                                            <el-form-item label="启运国">
+                                                <el-input v-model="dxpHeaderData.tradeCountryOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="5">
+                                            <el-form-item label="贸易国别">
+                                                <el-input v-model="dxpHeaderData.tradeAreaCodeOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="7">
+                                            <el-form-item label="装货港">
+                                                <el-input v-model="dxpHeaderData.distinatePortOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <el-form-item label="包装种类">
+                                                <el-input v-model="dxpHeaderData.wrapTypeOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <el-form-item label="运费币制">
+                                                <el-input v-model="dxpHeaderData.feeCurrOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                    <el-row>
+                                        <el-col :span="7">
+                                            <el-form-item label="保险费币制">
+                                                <el-input v-model="dxpHeaderData.insurCurrOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="7">
+                                            <el-form-item label="杂费币制">
+                                                <el-input v-model="dxpHeaderData.otherCurrOld"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                        <el-col :span="8">
+                                            <!--录入单位统一代码;首次进行暂存操作的IC卡企业组织机构编码和18位统一编码（统一编码可空）-->
+                                            <el-form-item label="录入单位统一代码">
+                                                <el-input v-model="dxpHeaderData.copCodeScc"></el-input>
+                                            </el-form-item>
+                                        </el-col>
+                                    </el-row>
+                                </el-form>
+                            </div>
+                            <div class="div2">
+                                <el-divider content-position="left">集装箱信息</el-divider>
+                                <div class="containerTable" style="width: 100%;height: 350px; float: left">
+                                    <el-card class="el-card-define">
+                                        <el-table
+                                                :data="dxpHeaderData.dxpDecContainerList"
+                                                border
+                                                stripe
+                                                fit
+                                                @row-dblclick="doubleClickCon"
+                                                width="100%"
+                                                height="260px"
+                                                size="mini">
+                                            <el-table-column
+                                                    type="index"
+                                                    label="序号"
+                                                    width="50">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="containerId"
+                                                    label="集装箱号"
+                                                    width="130">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="containerMd"
+                                                    label="集装箱规格"
+                                                    width="130">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="containerWt"
+                                                    label="集装箱自重"
+                                                    width="130">
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-card>
+                                </div>
+                                <div class="containerField" style="width: 100%; height: 400px;float: left;margin-top: 20px;">
+                                    <el-form ref="dxpContainerData" :model="dxpContainerData" label-width="135px" size="mini" label-position="right" style="font-size: 10px">
+                                        <el-row class = "row">
+                                            <el-col :span="18">
+                                                <el-form-item label="报关单统一编号">
+                                                    <el-input v-model="dxpContainerData.seqNo"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row">
+                                            <el-col :span="18">
+                                                <el-form-item label="集装箱号">
+                                                    <el-input v-model="dxpContainerData.containerId"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row">
+                                            <el-col :span="18">
+                                                <el-form-item label="集装箱规格">
+                                                    <el-input v-model="dxpContainerData.containerMd"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row">
+                                            <el-col :span="18">
+                                                <el-form-item label="集装箱自重">
+                                                    <el-input v-model="dxpContainerData.containerWt"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row">
+                                            <el-col :span="18">
+                                                <el-form-item label="入库时间">
+                                                    <el-input v-model="dxpContainerData.realtime"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row">
+                                            <el-col :span="18">
+                                                <el-form-item label="集装箱规格(旧)">
+                                                    <el-input v-model="dxpContainerData.containerMdOld"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                    </el-form>
+                                </div>
+                            </div>
+                            <div class="div4">
+                                <el-divider content-position="left">随附单证信息</el-divider>
+                                <div class="edocRelationTable" style="width: 100%;height: 240px; float: left">
+                                    <el-card class="el-card-define">
+                                        <el-table
+                                                :data="dxpHeaderData.dxpDecEdocRelationList"
+                                                border
+                                                stripe
+                                                fit
+                                                @row-dblclick="doubleClickedoc"
+                                                width="100%"
+                                                height="50%"
+                                                size="mini">
+                                            <el-table-column
+                                                    type="index"
+                                                    label="序号"
+                                                    width="50">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="edocCode"
+                                                    label="随附单证类别"
+                                                    width="150">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="edocFomatType"
+                                                    label="随附单据格式类型"
+                                                    width="150">
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-card>
+                                </div>
+                                <div class="edocRelationField" style="width: 100%; height: 600px;float: left;margin-top: 5px;">
+                                    <el-form ref="dxpedocRelationData" :model="dxpedocRelationData" label-width="135px" size="mini" label-position="right" style="font-size: 10px">
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="海关统一编号">
+                                                    <el-input v-model="dxpedocRelationData.declPrice"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="随附单据编号">
+                                                    <el-input v-model="dxpedocRelationData.edocId"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="随附单证类别">
+                                                    <el-input v-model="dxpedocRelationData.edocCode"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="随附单据格式类型">
+                                                    <el-input v-model="dxpedocRelationData.edocFomatType"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="操作说明">
+                                                    <el-input v-model="dxpedocRelationData.opNote"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="所属单位海关编号">
+                                                    <el-input v-model="dxpedocRelationData.edocOwnerCode"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="签名单位代码">
+                                                    <el-input v-model="dxpedocRelationData.signUnit"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="签名时间">
+                                                    <el-input v-model="dxpedocRelationData.signTime"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="所属单位名称">
+                                                    <el-input v-model="dxpedocRelationData.edocOwnerName"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="随附单据文件大小">
+                                                    <el-input v-model="dxpedocRelationData.edocSize"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row class = "row2">
+                                            <el-col :span="20">
+                                                <el-form-item label="入库时间">
+                                                    <el-input v-model="dxpedocRelationData.realtime"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                    </el-form>
+                                </div>
+                            </div>
+                            <div class="div3">
+                                <el-divider content-position="left">报关单表体</el-divider>
+                                <div class="detailTable" style="width: 100%;height: 200px;float: left;">
+                                    <el-card class="el-card-define">
+                                        <el-table
+                                                :data="dxpHeaderData.dxpDecListList"
+                                                border
+                                                stripe
+                                                fit
+                                                @row-dblclick="doubleClickDetail"
+                                                width="100%"
+                                                height="50%"
+                                                size="mini">
+                                            <el-table-column
+                                                    type="index"
+                                                    label="序号"
+                                                    width="50">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="seqNo"
+                                                    label="海关统一编号"
+                                                    width="170">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="classMark"
+                                                    label="归类标志"
+                                                    width="170">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="codeTs"
+                                                    label="商品编号"
+                                                    width="170">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="declPrice"
+                                                    label="申报单价"
+                                                    width="170">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="realtime"
+                                                    label="入库时间"
+                                                    width="170">
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-card>
+                                </div>
+                                <div class="detailField" style="width: 100%;height: 400px;float: left;margin-top: 2px;">
+                                    <el-form ref="dxpDetailData" :model="dxpDetailData" label-width="135px" size="mini" label-position="right" style="font-size: 10px">
+                                        <el-row>
+                                            <el-col :span="8">
+                                                <el-form-item label="报关单统一编号">
+                                                    <el-input v-model="dxpDetailData.seqNo"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="归类标志">
+                                                    <el-input v-model="dxpDetailData.classMark"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="商品编号">
+                                                    <el-input v-model="dxpDetailData.codeTs"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="8">
+                                                <el-form-item label="备案序号">
+                                                    <el-input v-model="dxpDetailData.contrItem"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="申报单价">
+                                                    <el-input v-model="dxpDetailData.declPrice"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="征减免税方式">
+                                                    <el-input v-model="dxpDetailData.dutyMode"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="8">
+                                                <el-form-item label="申报计量单位与法定单位比例因子">
+                                                    <el-input v-model="dxpDetailData.factor"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="商品规格、型号">
+                                                    <el-input v-model="dxpDetailData.gmodel"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="商品名称">
+                                                    <el-input v-model="dxpDetailData.gname"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="8">
+                                                <el-form-item label="商品序号">
+                                                    <el-input v-model="dxpDetailData.gno"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="原产地">
+                                                    <el-input v-model="dxpDetailData.originCountry"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="成交币制">
+                                                    <el-input v-model="dxpDetailData.tradeCurr"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="8">
+                                                <el-form-item label="申报总价">
+                                                    <el-input v-model="dxpDetailData.declTotal"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="申报数量">
+                                                    <el-input v-model="dxpDetailData.gqty"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="第一法定数量">
+                                                    <el-input v-model="dxpDetailData.firstQty"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="8">
+                                                <el-form-item label="第二法定数量">
+                                                    <el-input v-model="dxpDetailData.secondQty"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="申报计量单位">
+                                                    <el-input v-model="dxpDetailData.gunit"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="第一计量单位">
+                                                    <el-input v-model="dxpDetailData.firstUnit"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="8">
+                                                <el-form-item label="第二计量单位">
+                                                    <el-input v-model="dxpDetailData.secondUnit"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="用途/生产厂家">
+                                                    <el-input v-model="dxpDetailData.useTo"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="工缴费">
+                                                    <el-input v-model="dxpDetailData.workUsd"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="8">
+                                                <el-form-item label="货号">
+                                                    <el-input v-model="dxpDetailData.exgNo"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="版本号">
+                                                    <el-input v-model="dxpDetailData.exgVersion"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="最终目的国">
+                                                    <el-input v-model="dxpDetailData.destinationCountry"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="8">
+                                                <el-form-item label="原产地(旧)">
+                                                    <el-input v-model="dxpDetailData.originCountryOld"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="最终目的国(旧)">
+                                                    <el-input v-model="dxpDetailData.destinationCountryOld"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="8">
+                                                <el-form-item label="成交币制(旧)">
+                                                    <el-input v-model="dxpDetailData.tradeCurrOld"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                        </el-row>
+                                    </el-form>
+                                </div>
+                            </div>
+                            <div class="div5">
+                                <el-divider content-position="left">原产地证明项号</el-divider>
+                                <el-card class="el-card-define">
+                                    <el-table
+                                            :data="dxpHeaderData.dxpDecEcoRelationList"
+                                            border
+                                            stripe
+                                            fit
+                                            width="100%"
+                                            height="100%"
+                                            size="mini">
+                                        <el-table-column
+                                                type="index"
+                                                label="序号"
+                                                width="50">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="seqNo"
+                                                label="海关统一编号"
+                                                width="230">
+                                        </el-table-column>
+                                        <!-- 单据类型：Y14:原产地证明-->
+                                        <el-table-column
+                                                prop="certType"
+                                                label="单据类型"
+                                                width="230">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="ecoCertNo"
+                                                label="单据证书号"
+                                                width="230">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="decgNo"
+                                                label="报关单商品项号"
+                                                width="230">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="ecogNo"
+                                                label="原产地证书单证项号"
+                                                width="230">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="realtime"
+                                                label="入库时间"
+                                                width="230">
+                                        </el-table-column>
+                                    </el-table>
+                                </el-card>
+                            </div>
+                            <div class="div6">
+                                <el-divider content-position="left">电子随附单据</el-divider>
+                                <el-table
+                                        :data="dxpHeaderData.dxpDecEdocRelationList"
+                                        border
+                                        stripe
+                                        fit
+                                        width="100%"
+                                        height="80%"
+                                        size="mini">
+                                    <el-table-column
+                                            type="index"
+                                            label="序号"
+                                            width="50">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="seqNo"
+                                            label="海关统一编号"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="edocId"
+                                            label="文件名、随附单据编号"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="edocCode"
+                                            label="随附单证类别"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="edocFomatType"
+                                            label="随附单据格式类型"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="opNote"
+                                            label="操作说明"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="edocCopId"
+                                            label="随附单据文件企业名"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="edocOwnerCode"
+                                            label="所属单位海关编号"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="signUnit"
+                                            label="签名单位代码"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="signTime"
+                                            label="签名时间"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="edocOwnerName"
+                                            label="所属单位名称"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="edocSize"
+                                            label="随附单据文件大小"
+                                            width="140">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="realtime"
+                                            label="入库时间"
+                                            width="140">
+                                    </el-table-column>
+                                </el-table>
+                                </el-card>
+                            </div>
+                            <div class="div7">
+                                <el-divider content-position="left">报关单附加信息</el-divider>
+                                <el-card class="el-card-define">
+                                    <el-table
+                                            :data="dxpHeaderData.dxpDecFreeTxtList"
+                                            border
+                                            stripe
+                                            fit
+                                            width="100%"
+                                            height="100%"
+                                            size="mini">
+                                        <el-table-column
+                                                type="index"
+                                                label="序号"
+                                                width="50">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="seqNo"
+                                                label="海关统一编号"
+                                                width="200">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="relId"
+                                                label="关联报关单号"
+                                                width="200">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="relManNo"
+                                                label="关联备案号"
+                                                width="200">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="bonNo"
+                                                label="监管仓号"
+                                                width="200">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="decBpNo"
+                                                label="报关员联系方式"
+                                                width="200">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="cusFie"
+                                                label="货场代码"
+                                                width="200">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="decNo"
+                                                label="报关员海关注册编码"
+                                                width="200">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="realtime"
+                                                label="入库时间"
+                                                width="200">
+                                        </el-table-column>
+                                    </el-table>
+                                </el-card>
+                            </div>
+                            <div class="div8">
+                                <el-divider content-position="left">报关单随附单证信息</el-divider>
+                                <el-card class="el-card-define">
+                                    <el-table
+                                            :data="dxpHeaderData.dxpDecFreeTxtList"
+                                            border
+                                            stripe
+                                            fit
+                                            width="100%"
+                                            height="100%"
+                                            size="mini">
+                                        <el-table-column
+                                                type="index"
+                                                label="序号"
+                                                width="110">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="seqNo"
+                                                label="预申报编号"
+                                                width="330">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="docuCode"
+                                                label="单证代码"
+                                                width="330">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="certCode"
+                                                label="单证编号"
+                                                width="330">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="realtime"
+                                                label="入库时间"
+                                                width="330">
+                                        </el-table-column>
+                                    </el-table>
+                                </el-card>
+                            </div>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="转关单信息" name="dxpTrn">
+                        <el-collapse v-model="trnNames" @change="handleChange">
+                            <el-collapse-item title="转关单表头信息" name="1">
+                                <el-card class="el-card-define">
+                                    <div slot="header">
+                                        <el-form id="dxpDecTrnHead" :model="dxpDecTrnHead" label-width="140px"
+                                                 size="mini" label-position="right">
+                                            <el-row>
+                                                <el-col :span="6">
+                                                    <el-form-item label="报关单统一编号">
+                                                        <el-input v-model="dxpDecTrnHead.seqNo"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="转关单统一编号">
+                                                        <el-input v-model="dxpDecTrnHead.trnPreId"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <!--南方模式中的载货清单号-->
+                                                <el-col :span="6">
+                                                    <el-form-item label="载货清单号">
+                                                        <el-input v-model="dxpDecTrnHead.transNo"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="转关申报单号">
+                                                        <el-input v-model="dxpDecTrnHead.turnNo"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                            </el-row>
+                                                <el-row>
+                                                    <el-col :span="6">
+                                                        <el-form-item label="境内运输方式">
+                                                            <el-input v-model="dxpDecTrnHead.nativeTrafMode"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6">
+                                                        <el-form-item label="境内运输工具编号">
+                                                            <el-input v-model="dxpDecTrnHead.trafCustomsNo"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6">
+                                                        <el-form-item label="境内运输工具名称">
+                                                            <el-input v-model="dxpDecTrnHead.nativeShipName"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6">
+                                                        <el-form-item label="境内运输工具航次">
+                                                            <el-input v-model="dxpDecTrnHead.NativeVoyageNo"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                </el-row>
+                                                <el-row>
+                                                    <el-col :span="6">
+                                                        <el-form-item label="承运单位名称">
+                                                            <el-input v-model="dxpDecTrnHead.contractorName"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                    <!-- 承运单位组织机构代码-->
+                                                    <el-col :span="6">
+                                                        <el-form-item label="承运单位机构代码">
+                                                            <el-input v-model="dxpDecTrnHead.contractorCode"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                    <!--1—转关提前； AA—出口二次转关-->
+                                                    <el-col :span="6">
+                                                        <el-form-item label="转关类型">
+                                                            <el-input v-model="dxpDecTrnHead.transFlag"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6">
+                                                        <el-form-item label="预计运抵指运地时间">
+                                                            <el-input v-model="dxpDecTrnHead.validTime"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                </el-row>
+                                                <el-row>
+                                                    <el-col :span="6">
+                                                        <el-form-item label="是否启用电子关锁">
+                                                            <el-input v-model="dxpDecTrnHead.esealFlag"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                    <el-col :span="6">
+                                                        <el-form-item label="备注">
+                                                            <el-input v-model="dxpDecTrnHead.notes"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                    <!--1代表无纸申报，0或空为普通有纸申报-->
+                                                    <el-col :span="6">
+                                                        <el-form-item label="转关单类型">
+                                                            <el-input v-model="dxpDecTrnHead.trnType"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                    <!--转关申报单位统一代码-->
+                                                    <el-col :span="6">
+                                                        <el-form-item label="申报单位统一代码">
+                                                            <el-input v-model="dxpDecTrnHead.ApplCodeScc"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                </el-row>
+                                                <el-row>
+                                                    <el-col :span="6">
+                                                        <el-form-item label="入库时间">
+                                                            <el-input v-model="dxpDecTrnHead.realtime"></el-input>
+                                                        </el-form-item>
+                                                    </el-col>
+                                                </el-row>
+                                        </el-form>
+                                    </div>
+                                </el-card>
+                            </el-collapse-item>
+                            <el-collapse-item title="转关单表体信息" name="2">
+                                <el-card class="el-card-define">
+                                    <div slot="header">
+                                        <el-form id="dxpDecTrnList" :model="dxpDecTrnList" label-width="140px"
+                                                 size="mini" label-position="right">
+                                            <el-row>
+                                                <el-col :span="6">
+                                                    <el-form-item label="报关单统一编号">
+                                                        <el-input v-model="dxpDecTrnList.seqNo"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="转关单统一编号">
+                                                        <el-input v-model="dxpDecTrnList.trnPreId"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="进出境运输方式">
+                                                        <el-input v-model="dxpDecTrnList.trafMode"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="进出境运输工具编号">
+                                                        <el-input v-model="dxpDecTrnList.shipId"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                            </el-row>
+                                            <el-row>
+                                                <!--进出境运输工具名称（船舶名称）-->
+                                                <el-col :span="6">
+                                                    <el-form-item label="进出境运输工具名称">
+                                                        <el-input v-model="dxpDecTrnList.shipNameEn"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="进出境运输工具航次">
+                                                        <el-input v-model="dxpDecTrnList.voyageNo"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="提单号">
+                                                        <el-input v-model="dxpDecTrnList.billNo"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="实际进出境日期">
+                                                        <el-input v-model="dxpDecTrnList.iedate"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                            </el-row>
+                                            <el-row>
+                                                <el-col :span="6">
+                                                    <el-form-item label="入库时间">
+                                                        <el-input v-model="dxpDecTrnList.realtime"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                            </el-row>
+                                        </el-form>
+                                    </div>
+                                </el-card>
+                            </el-collapse-item>
+                            <el-collapse-item title="集装箱信息" name="3">
+                                <el-card class="el-card-define">
+                                    <div slot="header">
+                                        <el-table
+                                                :data="dxpHeaderData.dxpDecTrnContainerList"
+                                                border
+                                                stripe
+                                                fit
+                                                @row-dblclick="dxpTrnConClick"
+                                                width="100%"
+                                                height="100%"
+                                                size="mini">
+                                            <el-table-column
+                                                    type="index"
+                                                    label="序号"
+                                                    width="50">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="contaNo"
+                                                    label="集装箱号"
+                                                    width="200">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="contaSn"
+                                                    label="集装箱序号"
+                                                    width="230">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="contaModel"
+                                                    label="集装箱规格"
+                                                    width="230">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="sealNo"
+                                                    label="电子关锁号"
+                                                    width="230">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="transName"
+                                                    label="境内运输工具名称"
+                                                    width="230">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="transWeight"
+                                                    label="运输工具实际重量"
+                                                    width="220">
+                                            </el-table-column>
+                                        </el-table>
+                                    </div>
+                                    <div>
+                                        <el-form ref="dxpDecTrnConData" :model="dxpDecTrnConData" label-width="130px" size="mini" label-position="right" style="font-size: 10px; margin-top: 10px">
+                                            <el-row>
+                                                <el-col :span="6">
+                                                    <el-form-item label="报关单统一编号">
+                                                        <el-input v-model="dxpDecTrnConData.seqNo"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="转关单统一编号">
+                                                        <el-input v-model="dxpDecTrnConData.trnPreId"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="集装箱号">
+                                                        <el-input v-model="dxpDecTrnConData.contaNo"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="集装箱序号">
+                                                        <el-input v-model="dxpDecTrnConData.contaSn"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                            </el-row>
+                                            <el-row>
+                                                <el-col :span="6">
+                                                    <el-form-item label="集装箱规格">
+                                                        <el-input v-model="dxpDecTrnConData.contaModel"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="电子关锁号">
+                                                        <el-input v-model="dxpDecTrnConData.sealNo"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="境内运输工具名称">
+                                                        <el-input v-model="dxpDecTrnConData.transName"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="运输工具实际重量">
+                                                        <el-input v-model="dxpDecTrnConData.transWeight"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                            </el-row>
+                                            <el-row>
+                                                <el-col :span="6">
+                                                    <el-form-item label="入库时间">
+                                                        <el-input v-model="dxpDecTrnConData.realtime"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                                <el-col :span="6">
+                                                    <el-form-item label="集装箱规格">
+                                                        <el-input v-model="dxpDecTrnConData.contaModelOld"></el-input>
+                                                    </el-form-item>
+                                                </el-col>
+                                            </el-row>
+                                        </el-form>
+                                    </div>
+                                </el-card>
+                            </el-collapse-item>
+                            <el-collapse-item title="商品信息展示" name="4">
+                                <div class="trnContainerGoods">
+                                <el-row>
+                                    <el-col>
+                                        <el-divider content-position="left">商品信息展示</el-divider>
+                                        <el-card class="el-card-define">
+                                            <el-table
+                                                    :data="dxpHeaderData.dxpDecTrnContaGoodsList"
+                                                    border
+                                                    stripe
+                                                    fit
+                                                    width="100%"
+                                                    height="100%"
+                                                    size="mini">
+                                                <el-table-column
+                                                        type="index"
+                                                        label="序号"
+                                                        width="80">
+                                                </el-table-column>
+                                                <el-table-column
+                                                        prop="gno"
+                                                        label="商品序号"
+                                                        width="230">
+                                                </el-table-column>
+                                                <el-table-column
+                                                        prop="contaGoodsCount"
+                                                        label="商品件数"
+                                                        width="240">
+                                                </el-table-column>
+                                            </el-table>
+                                        </el-card>
+                                    </el-col>
+                                </el-row>
+                                </div>
+                                <!--第二列-->
+                                <div class="trnContainerGoodsRelation">
+                                    <el-row>
+                                    <el-col>
+                                        <el-divider content-position="left">集装箱与商品关系</el-divider>
+                                        <el-card class="el-card-define">
+                                            <div>
+                                                <el-table
+                                                        :data="dxpHeaderData.dxpDecTrnContaGoodsList"
+                                                        border
+                                                        stripe
+                                                        fit
+                                                        @row-dblclick="dxpTrnConGoodsClick"
+                                                        width="100%"
+                                                        height="100%"
+                                                        size="mini">
+                                                    <el-table-column
+                                                            type="index"
+                                                            label="序号"
+                                                            width="60">
+                                                    </el-table-column>
+                                                    <el-table-column
+                                                            prop="gno"
+                                                            label="商品序号"
+                                                            width="200">
+                                                    </el-table-column>
+                                                    <el-table-column
+                                                            prop="contaNo"
+                                                            label="集装箱号"
+                                                            width="200">
+                                                    </el-table-column>
+                                                    <el-table-column
+                                                            prop="contaGoodsCount"
+                                                            label="商品件数"
+                                                            width="200">
+                                                    </el-table-column>
+                                                    <el-table-column
+                                                            prop="contaGoodsWeight"
+                                                            label="商品重量"
+                                                            width="200">
+                                                    </el-table-column>
+                                                </el-table>
+                                            </div>
+                                        </el-card>
+                                    </el-col>
+                                    </el-row>
+                                    <div style="margin-top: 50px; margin-left: 0px;height:100px;">
+                                    <el-form id="dxpTrnConGoodsRelationData" :model="dxpTrnConGoodsRelationData" label-width="130px"
+                                             size="mini" label-position="right">
+                                        <el-row>
+                                            <el-col :span="6">
+                                                <el-form-item label="商品序号">
+                                                    <el-input v-model="dxpTrnConGoodsRelationData.gno"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="6">
+                                                <el-form-item label="集装箱号">
+                                                    <el-input v-model="dxpTrnConGoodsRelationData.contaNo"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="6">
+                                                <el-form-item label="商品件数">
+                                                    <el-input v-model="dxpTrnConGoodsRelationData.contaGoodsCount"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                            <el-col :span="6">
+                                                <el-form-item label="商品重量">
+                                                    <el-input v-model="dxpTrnConGoodsRelationData.contaGoodsWeight"></el-input>
+                                                </el-form-item>
+                                            </el-col>
+                                        </el-row>
+                                    </el-form>
+                                    </div>
+                                </div>
+                            </el-collapse-item>
+                        </el-collapse>
+                        <!--<div class="trn_box">
+                            <div class="trnDetail">
+                                <el-divider content-position="left">转关单表体信息</el-divider>
+                            </div>
+                            <div class="trnContainer">
+                                <el-divider content-position="left">集装箱信息</el-divider>
+                            </div>
+                            <div class="trnContainerGoods">
+                                <el-divider content-position="left">商品信息展示</el-divider>
+                            </div>
+                            <div class="trnContainerGoodsRelation">
+                                <el-divider content-position="left">集装箱与商品关系</el-divider>
+                            </div>
+                        </div>-->
+                    </el-tab-pane>
+                </el-tabs>
+            </template>
+        </el-dialog>
+        <!--报关回执-->
+        <el-dialog title="报关回执" v-if="dxpResultVisible" :visible.sync="dxpResultVisible" width="90%" top="6vh">
+            <el-table
+                    :data="dxpDecResultData"
+                    border
+                    stripe
+                    fit
+                    size="mini">
+                <el-table-column
+                        type="index"
+                        label="序号"
+                        width="50">
+                </el-table-column>
+                <el-table-column
+                        prop="cusCiqNo"
+                        label="统一编号"
+                        width="160">
+                </el-table-column>
+                <el-table-column
+                        prop="entryId"
+                        label="海关编号"
+                        width="160">
+                </el-table-column>
+                <el-table-column
+                        prop="noticeDate"
+                        label="通知时间"
+                        width="160">
+                </el-table-column>
+                <el-table-column
+                        prop="channel"
+                        label="通道"
+                        width="160">
+                </el-table-column>
+                <el-table-column
+                        prop="note"
+                        label="备注"
+                        width="160">
+                </el-table-column>
+                <el-table-column
+                        prop="customMaster"
+                        label="主管海关"
+                        width="160">
+                </el-table-column>
+                <el-table-column
+                        prop="iEDate"
+                        label="进出口日期"
+                        width="160">
+                </el-table-column>
+                <el-table-column
+                        prop="dDate"
+                        label="结关日期"
+                        width="160">
+                </el-table-column>
+                <el-table-column
+                        prop="realtime"
+                        label="入库时间"
+                        width="160">
+                </el-table-column>
+            </el-table>
+        </el-dialog>
+        <el-row type="flex" justify="center">
+            <el-col :span="3" style="text-align: left;margin-top: 6px">
+                <el-button @click="init()" icon="el-icon-search" type="primary" plain size="mini">查询
+                </el-button>
+                <el-button @click="reset()" icon="el-icon-refresh" type="primary" plain size="mini">重置
+                </el-button>
+            </el-col>
+        </el-row>
+    </el-form>
+    <el-row size="mini" style="margin-top: 10px">
+        <el-table
+                :data="dxpTable"
+                border
+                stripe
+                fit
+                :height="tableHeight"
+                size="mini"
+        >
+            <el-table-column
+                    type="index"
+                    label="序号"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="seqNo"
+                    label="报关单统一编号"
+                    width="170">
+            </el-table-column>
+            <el-table-column
+                    prop="ieflag"
+                    label="进出口标志"
+                    width="80">
+            </el-table-column>
+            <el-table-column
+                    prop="agentName"
+                    label="申报单位名称"
+                    width="150">
+            </el-table-column>
+            <el-table-column
+                    prop="billNo"
+                    label="提单号"
+                    width="170">
+            </el-table-column>
+            <el-table-column
+                    prop="contrNo"
+                    label="合同号"
+                    width="100">
+            </el-table-column>
+            <el-table-column
+                    prop="customMaster"
+                    label="主管海关"
+                    width="80">
+            </el-table-column>
+            <el-table-column
+                    prop="cutMode"
+                    label="征免性质"
+                    width="80">
+            </el-table-column>
+            <el-table-column
+                    prop="distinatePort"
+                    label="装货港"
+                    width="100">
+            </el-table-column>
+            <el-table-column
+                    prop="districtCode"
+                    label="境内目的地"
+                    width="100">
+            </el-table-column>
+            <el-table-column
+                    prop="feeCurr"
+                    label="运费币制"
+                    width="80">
+            </el-table-column>
+            <el-table-column
+                    prop="feeMark"
+                    label="运费标记"
+                    width="80">
+            </el-table-column>
+            <el-table-column
+                    prop="feeRate"
+                    label="运费／率"
+                    width="80">
+            </el-table-column>
+            <el-table-column
+                    prop="grossWet"
+                    label="毛重"
+                    width="90">
+            </el-table-column>
+            <el-table-column
+                    prop="iedate"
+                    label="进出日期"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="realtime"
+                    label="入库时间"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    label="操作"
+                    width="180">
+                <template slot-scope="scope">
+                    <el-button @click="selectDetail(scope.row)" type="primary" plain size="mini">详情
+                    </el-button>
+                    <el-button @click="selectDecResult(scope.row)" type="primary" plain size="mini">查看回执
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-row>
+    <div style="text-align: center;position:fixed; bottom:0;width: 100%">
+        <el-pagination
+                @current-change="handleCurrentChange"
+                :current-page.sync="currPage"
+                background
+                :page-size="pageSize"
+                layout="total, prev, pager, next"
+                :total.sync="totals">
+        </el-pagination>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="js/vue/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
+<script type="text/javascript" src="js/axios.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript">
+    var version = new Vue({
+        el: '#dxp',
+        data: {
+            form: {
+                seqNo:'',
+                contrNo:'',
+                agentName:'',
+                createDateFrom:'',
+                createDateTo:''
+            },
+            dxpTable: [],
+            dxpHeaderData:{},
+            tableHeight: '',
+            dxpDetailData:{},
+            dxpContainerData:{},
+            dxpedocRelationData:{},
+            //转关单表头
+            dxpDecTrnHead:{},
+            //转关单表体
+            dxpDecTrnList:{},
+            //集装箱集合
+            dxpDecTrnContainerList:[],
+            //集装箱信息
+            dxpDecTrnConData:{},
+            //集装箱与商品信息集合
+            dxpDecTrnContaGoodsList:[],
+            //集装箱与商品信息
+            dxpTrnConGoodsRelationData:{},
+            trnNames:['1','2','3','4'],
+            //报关回执
+            dxpDecResultData:[],
+            currPage: 0,
+            totals: 0,
+            pageSize: 10,
+            pageNum: 1,
+            activeName:'dxp',
+            disabled:false,
+            dxpVisible :false,
+            dxpResultVisible:false
+        },
+        created() {
+            this._getTableHeight()
+        },
+        mounted() {
+            let _this = this;
+            window.onresize = () => {
+                if (_this.resizeFlag) {
+                    clearTimeout(_this.resizeFlag)
+                }
+                _this.resizeFlag = setTimeout(() => {
+                    _this._getTableHeight()
+                    _this.resizeFlag = null
+                }, 100)
+            };
+            _this.init();
+        },
+        methods: {
+            init: function () {
+                var params = this.form;
+                params.pageSize = this.pageSize;
+                params.pageNum = this.pageNum;
+                request.post('dxpDecController/selectList', params).then((r) => {
+                    if (r.data.success) {
+                        this.dxpTable = r.data.data.records;
+                        this.currPage = r.data.data.current;
+                        this.totals = r.data.data.total;
+                    }
+                    this.pageNum=1;
+                });
+            },
+            handleCurrentChange: function (val) {
+                this.pageNum = val;
+                this.form = {
+                    seqNo:'',
+                    contrNo:'',
+                    agentName:'',
+                    createDateFrom:'',
+                    createDateTo:''
+                };
+                this.init();
+            },
+            //计算table高度
+            _getTableHeight() {
+                let tableH = 220;
+                let tableHeightDetil = window.innerHeight - tableH;
+                if (tableHeightDetil <= 300) {
+                    this.tableHeight = 300
+                } else {
+                    this.tableHeight = window.innerHeight - tableH
+                }
+            },
+            // 重置检索条件
+            reset: function(){
+                if (this.$refs['form'] != undefined) {
+                    this.form = {
+                        seqNo:'',
+                        contrNo:'',
+                        agentName: '',
+                        createDateFrom:'',
+                        createDateTo:''
+                    };
+                    this.$refs['form'].resetFields();
+                }
+            },
+
+            //查详情
+            selectDetail: function(data){
+                console.log(data,"data")
+                request.post('dxpDecController/selectDetail',{seqNo:data.seqNo}).then((r)=>{
+                    if (r.data.success) {
+                        this.dxpHeaderData = r.data.data;
+                        if(r.data.data.dxpDecTrnHead == null){
+                            this.dxpDecTrnHead = {};
+                        }else {
+                            //转关单 表头
+                            this.dxpDecTrnHead = r.data.data.dxpDecTrnHead;
+                            //转关单 表体
+                            this.dxpDecTrnList = r.data.data.dxpDecTrnList;
+                        }
+                        this.dxpVisible=true;
+                    }else {
+                        version.$message.error(r.data.message);
+                    }
+                });
+            },
+
+            //报关回执信息
+            selectDecResult:function (data){
+                console.log(data,"data")
+                request.post('dxpDecController/selectDecResult',{'seqNo':data.seqNo}).then((r)=>{
+                    if (r.data.success) {
+                        this.dxpDecResultData = r.data.data;
+                        this.dxpResultVisible=true;
+                    }else {
+                        version.$message.error(r.data.message);
+                    }
+                })
+            },
+
+            //取消
+            cancel:function (){
+                this.dxpVisible = false;
+                this.activeName='dxp';
+                this.dxpHeaderData={};
+            },
+
+            //双击事件 回显数据 报关单表体
+            doubleClickDetail: function(row){
+                this.dxpDetailData = row;
+            },
+            // 集装箱信息
+            doubleClickCon: function(row){
+                this.dxpContainerData = row;
+            },
+            //随附单证信息
+            doubleClickedoc: function(row){
+                this.dxpedocRelationData = row;
+            },
+            //转关单集装箱信息
+            dxpTrnConClick:function (row){
+                this.dxpDecTrnConData = row;
+            },
+            //转关单 集装箱与商品关系
+            dxpTrnConGoodsClick:function (row){
+                this.dxpTrnConGoodsRelationData = row;
+            },
+            //tab标签
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
+            //折叠面板
+            handleChange(val) {
+                console.log(val);
+            },
+
+        }
+    })
+</script>
+<style>
+    .el-input.is-disabled .el-input__inner {
+        color: #606266;
+    }
+    .el-select-dropdown .el-scrollbar .el-scrollbar__wrap {
+        overflow: scroll !important;
+    }
+
+    .el-table th.gutter {
+        display: table-cell !important;
+    }
+
+    .el-table colgroup.gutter {
+        display: table-cell !important;
+    }
+    /*报关单样式*/
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    .div_bos {
+        height:100%;
+        width: 100%;
+    }
+    .div1{
+        height: 1170px;
+        width: 69%;
+        float: left;
+        border: 1px solid #DCDCDC;
+    }
+    .div2 {
+        height: 800px;
+        width: 30%;
+        float: right;
+        margin-left: 3px;
+        border: 1px solid #DCDCDC;
+    }
+    .div3{
+        height: 700px;
+        width: 69%;
+        float: left;
+        border: 1px solid #DCDCDC;
+    }
+    .div4 {
+        height: 1068px;
+        width: 30%;
+        float: right;
+        margin-top: 3px;
+        margin-left: 2px;
+        border: 1px solid #DCDCDC;
+    }
+    .div5{
+        height: 240px;
+        width: 100%;
+        float: left;
+        margin-top: 3px;
+        border: 1px solid #DCDCDC;
+    }
+    .div6{
+        height: 240px;
+        width: 100%;
+        float: left;
+        margin-top: 3px;
+        border: 1px solid #DCDCDC;
+    }
+    .div7{
+        height: 220px;
+        width: 100%;
+        float: left;
+        margin-top: 5px;
+        border: 1px solid #DCDCDC;
+    }
+    .div8{
+        height: 240px;
+        width: 100%;
+        float: left;
+        margin-top: 3px;
+        border: 1px solid #DCDCDC;
+    }
+    /*转关单样式*/
+    .trn_box{
+        height:840px ;
+        width: 100%;
+    }
+    .trnHeader{
+        width: 100%;
+        height: 200px;
+        background-color: #5daf34;
+    }
+    .trnDetail{
+        width:100%;
+        height:180px;
+        background-color: #3a8ee6;
+    }
+    .trnContainer{
+        width:100%;
+        height:260px;
+        background-color: #4E5467
+    }
+    .trnContainerGoods{
+        width:40%;
+        height:300px;
+        float: left;
+        border: 1px solid #DCDCDC;
+    }
+    .trnContainerGoodsRelation{
+        width:59%;
+        height:300px;
+        float: right;
+        border: 1px solid #DCDCDC;
+    }
+    .row{
+        height: 58px;
+    }
+    .row2{
+        height: 70px;
+    }
+    .edocRelationField{
+        margin: 0;
+    }
+
+    /*滚动条样式*/
+    ::-webkit-scrollbar {
+       width: 8px;
+       height: 8px;
+    }
+    /*正常情况下滑块的样式*/
+    ::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+    }
+    /*鼠标悬浮在该类指向的控件上时滑块的样式*/
+    :hover::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+    }
+    /*鼠标悬浮在滑块上时滑块的样式*/
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+    /*正常时候的主干部分*/
+    ::-webkit-scrollbar-track {
+        border-radius: 8px;
+        background-color: white;
+    }
+    /*鼠标悬浮在滚动条上的主干部分*/
+    ::-webkit-scrollbar-track:hover {
+        background-color: rgba(0, 0, 0, 0.01);
+    }
+</style>
+</html>

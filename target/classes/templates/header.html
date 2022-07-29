@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>header.html</title>
+
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.6/lib/theme-chalk/index.css">
+
+</head>
+<style>
+    .header {
+        background-color: #205BD1;
+    }
+</style>
+
+<body class="header">
+<div id="header">
+    <el-row :gutter="20">
+        <el-col :span="1">
+            <img style="width:39px;height: 60px;margin-left: 25px" src="img/navbar-header.png">
+        </el-col>
+        <el-col :span="10">
+            <div style="float: left">
+                <span class="title">中国(江苏)国际贸易单一窗口</span>
+                <span class="title_en">China International Trade Single Window</span>
+            </div>
+            <div style="float: left">
+                <span class="span_line">|</span>
+                <span class="menu_name">查验信息推送</span>
+            </div>
+        </el-col>
+        <el-col :span="13">
+            <div style="float: right;margin-right: 20px">
+                <div style="float: left">
+                    <img style="width:30px;height: 60px;" src="img/person.png">
+                </div>
+                <div class="title_str">欢迎您,<span th:text="${session.copName}"></span>&nbsp;&nbsp;<span
+                        th:text="${session.createUser}"></span>
+                    <span class="span_line">|</span>
+                </div>
+                <div style="float: left">
+                    <img style="width:31px;height: 60px;margin-left: 15px" src="img/exit.png">
+                </div>
+                <div class="logout">
+                    <span>
+                        <a href="javascript:logout()">退出</a>
+                    </span>
+                </div>
+            </div>
+        </el-col>
+    </el-row>
+</div>
+</body>
+<script type="text/javascript" src="js/vue/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
+<script type="text/javascript" src="js/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="js/public.js"></script>
+<style>
+    .title {
+        color: #fff;
+        font-family: SimHei;
+        font-size: 20px;
+        line-height: 30px;
+        margin-left: 5px;
+        margin-top: 10px;
+        font-weight: bold;
+        display: block;
+    }
+
+    .title_en {
+        color: #fff;
+        font-family: Microsoft YaHei;
+        font-size: 10px;
+        line-height: 10px;
+        margin-left: 5px;
+        display: block;
+    }
+
+    .span_line {
+        color: #fff;
+        font-family: Microsoft YaHei;
+        font-size: 22px;
+        line-height: 60px;
+        margin-left: 20px;
+        font-weight: bold;
+    }
+
+    .menu_name {
+        color: #fff;
+        font-family: Microsoft YaHei;
+        font-size: 22px;
+        line-height: 60px;
+        margin-left: 15px;
+    }
+
+    .title_str {
+        float: left;
+        display: inline;
+        line-height: 60px;
+        margin-left: 10px;
+        cursor: pointer;
+        color: #fff;
+        font-family: Microsoft YaHei;
+        font-size: 14px;
+    }
+
+    .logout {
+        float: left;
+        line-height: 60px;
+    }
+
+    .logout span {
+        color: #fff;
+        font-family: Microsoft YaHei;
+        font-size: 14px;
+    }
+
+    .logout span a {
+        color: #fff;
+        font-family: Microsoft YaHei;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+</style>
+<script type="text/javascript">
+    var casServerLogoutUrl = getCookie("casServerLogoutUrl");
+    var fake = getCookie("fake");
+    var header = new Vue({
+        el: '#header',
+        data: {}
+    })
+
+    // 退出登陆
+    function logout() {
+        if(casServerLogoutUrl!= undefined && casServerLogoutUrl.indexOf("\"")>0){
+            casServerLogoutUrl = casServerLogoutUrl.replace("\"","")
+        }
+        $.ajax({
+            url: 'loginController/logout',
+            type: 'post', //HTTP请求类型
+            contentType: "application/json",
+            timeout: 100000, //超时时间设置为30秒；
+            headers: {'Content-type': 'application/json;charset=UTF-8'},
+            success: function (result) {
+                if(casServerLogoutUrl == undefined){
+                    parent.location.href = 'login.html';
+                }else{
+                    /*$.ajax({
+                        url: casServerLogoutUrl,
+                        type: 'GET', //HTTP请求类型
+                        dataType: 'jsonp',
+                        jsonpCallback: "onBack"
+                    });*/
+                    parent.location.href = casServerLogoutUrl;
+                }
+            }
+        });
+    }
+</script>
+</html>
